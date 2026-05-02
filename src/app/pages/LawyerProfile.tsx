@@ -1,0 +1,613 @@
+import { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Star,
+  Award,
+  Languages,
+  CheckCircle,
+  Scale,
+  Calendar,
+} from "lucide-react";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Separator } from "../components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import { Input } from "../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import { ConsultationType, Lawyer } from "../data/lawyers";
+import { ChatbotWidget } from "../components/ChatbotWidget";
+
+const consultationConfig = {
+  "oral-presencial": {
+    label: "Oral presencial",
+    emoji: "💬👤",
+    description: "Reunión presencial en oficina para discutir tu caso",
+  },
+  "escrita-presencial": {
+    label: "Escrita presencial",
+    emoji: "📝✍️",
+    description: "Entrega y recepción de documentación en oficina",
+  },
+  "oral-videollamada": {
+    label: "Oral por videollamada",
+    emoji: "💬📹",
+    description: "Videollamada en tiempo real para discutir tu caso",
+  },
+  "escrita-videollamada": {
+    label: "Escrita por videollamada",
+    emoji: "📝💻",
+    description: "Consulta escrita con seguimiento virtual",
+  },
+};
+
+// Generar horarios disponibles de ejemplo
+const generateAvailableSlots = () => {
+  const slots = [];
+  const today = new Date();
+
+  for (let i = 1; i <= 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dateStr = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+
+    slots.push({
+      date: dateStr,
+      fullDate: date,
+      times: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00']
+    });
+  }
+
+  return slots;
+};
+
+export function LawyerProfile() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [lawyer, setLawyer] = useState<Lawyer | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [consultationType, setConsultationType] = useState<ConsultationType | "">(
+    ""
+  );
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchLawyer = async () => {
+      try {
+        const response = await fetch(`/api/lawyers/${id}`);
+        if (!response.ok) {
+          throw new Error("Abogado no encontrado");
+        }
+
+        const data = await response.json();
+        setLawyer(data);
+      } catch (error) {
+        setFetchError(
+          error instanceof Error ? error.message : "Error desconocido"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLawyer();
+  }, [id]);
+
+  useEffect(() => {
+    if (!consultationType && lawyer?.consultationType.length) {
+      setConsultationType(lawyer.consultationType[0]);
+    }
+  }, [lawyer, consultationType]);
+
+  // Datos del formulario
+  const [clientName, setClientName] = useState("");
+  const [clientAge, setClientAge] = useState("");
+  const [caseType, setCaseType] = useState("");
+  const [caseDescription, setCaseDescription] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+
+  const availableSlots = generateAvailableSlots();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg font-medium">Cargando abogado...</p>
+      </div>
+    );
+  }
+
+  if (fetchError || !lawyer) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <p className="text-muted-foreground mb-4">
+            {fetchError ?? "Abogado no encontrado"}
+          </p>
+          <Button asChild>
+            <Link to="/find-lawyer">Volver a búsqueda</Link>
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  const handleOpenBooking = () => {
+    setShowBookingDialog(true);
+  };
+
+  const handleSubmitBooking = () => {
+    // Validar que todos los campos estén completos
+    if (!clientName || !clientAge || !caseType || !caseDescription || !selectedDate || !selectedTime) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+
+    // Cerrar modal
+    setShowBookingDialog(false);
+
+    // Redirigir al panel de pago
+    navigate("/payment", {
+      state: {
+        lawyer,
+        consultationType,
+        caseDescription,
+        clientName,
+        clientAge,
+        caseType,
+        selectedDate,
+        selectedTime,
+      },
+    });
+  };
+
+  const canProceed = () => {
+    return clientName && clientAge && caseType && caseDescription && selectedDate && selectedTime;
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b sticky top-0 bg-background z-10">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/find-lawyer">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+            </Button>
+            <div className="flex items-center gap-2">
+              <Scale className="w-8 h-8 text-primary" />
+              <span className="text-xl font-semibold">LegalConnect</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Columna principal - Perfil */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Información básica */}
+            <Card>
+              <CardContent className="p-0">
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="md:col-span-1">
+                    <img
+                      src={lawyer.image}
+                      alt={lawyer.name}
+                      className="w-full h-full object-cover rounded-l-lg"
+                    />
+                  </div>
+                  <div className="md:col-span-2 p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h1 className="text-3xl font-bold mb-2">
+                          {lawyer.name}
+                        </h1>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                          <span className="font-semibold text-lg">
+                            {lawyer.rating}
+                          </span>
+                          <span className="text-muted-foreground">
+                            ({lawyer.reviews} reseñas)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {lawyer.specialty.map((spec) => (
+                        <Badge key={spec} className="capitalize">
+                          {spec}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="flex items-center gap-2">
+                        <Award className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Experiencia
+                          </p>
+                          <p className="font-semibold">{lawyer.experience} años</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Languages className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Idiomas</p>
+                          <p className="font-semibold">
+                            {lawyer.languages.join(", ")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator className="my-6" />
+
+                    <div>
+                      <h3 className="font-semibold mb-2">Sobre mí</h3>
+                      <p className="text-muted-foreground">
+                        {lawyer.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tabs con información adicional */}
+            <Tabs defaultValue="servicios">
+              <TabsList className="w-full">
+                <TabsTrigger value="servicios" className="flex-1">
+                  Servicios
+                </TabsTrigger>
+                <TabsTrigger value="resenas" className="flex-1">
+                  Reseñas
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="servicios" className="mt-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Tipos de consulta disponibles</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {lawyer.consultationType.map((type) => {
+                      const config = consultationConfig[type];
+                      const price = lawyer.price[type];
+
+                      return (
+                        <div key={type} className="flex items-start gap-4 p-4 border rounded-lg">
+                          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 text-xl">
+                            {config.emoji}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold mb-1">{config.label}</h4>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {config.description}
+                            </p>
+                            <p className="text-lg font-semibold text-primary">
+                              ${price}/{type.includes("oral") ? "hora" : "consulta"}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="resenas" className="mt-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Reseñas de clientes</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {[
+                      {
+                        name: "Juan Pérez",
+                        rating: 5,
+                        comment:
+                          "Excelente profesional, resolvió mis dudas de manera clara y precisa.",
+                        date: "Hace 2 semanas",
+                      },
+                      {
+                        name: "María López",
+                        rating: 5,
+                        comment:
+                          "Muy recomendable, su experiencia se nota en cada consejo.",
+                        date: "Hace 1 mes",
+                      },
+                      {
+                        name: "Carlos Rodríguez",
+                        rating: 4,
+                        comment:
+                          "Buen servicio, respondió todas mis preguntas con paciencia.",
+                        date: "Hace 2 meses",
+                      },
+                    ].map((review, index) => (
+                      <div key={index} className="border-b pb-4 last:border-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="font-semibold">{review.name}</p>
+                          <span className="text-sm text-muted-foreground">
+                            {review.date}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < review.rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {review.comment}
+                        </p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Sidebar - Solicitar consulta */}
+          <div className="lg:col-span-1">
+            <Card className="sticky top-24">
+              <CardHeader>
+                <CardTitle>Solicitar consulta</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Tipo de consulta */}
+                <div>
+                  <Label className="mb-3 block">Tipo de consulta *</Label>
+                  <RadioGroup
+                    value={consultationType}
+                    onValueChange={(value) =>
+                      setConsultationType(value as ConsultationType)
+                    }
+                  >
+                    {lawyer.consultationType.map((type) => {
+                      const config = consultationConfig[type];
+                      const price = lawyer.price[type];
+
+                      return (
+                        <div key={type} className="flex items-center space-x-2 border p-3 rounded-lg hover:border-primary transition-colors">
+                          <RadioGroupItem value={type} id={type} />
+                          <Label htmlFor={type} className="flex-1 cursor-pointer">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{config.emoji}</span>
+                                <span className="text-sm">{config.label}</span>
+                              </div>
+                              <span className="font-semibold text-sm">
+                                ${price}
+                              </span>
+                            </div>
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </RadioGroup>
+                </div>
+
+                {/* Disponibilidad */}
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span className="font-semibold">{lawyer.availability}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Recibirás confirmación en 24 horas
+                  </p>
+                </div>
+
+                {/* Precio total */}
+                <div className="border-t pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-lg font-semibold">Precio:</span>
+                    <span className="text-2xl font-bold text-primary">
+                      ${consultationType ? lawyer.price[consultationType] : "0"}
+                    </span>
+                  </div>
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handleOpenBooking}
+                    disabled={!consultationType}
+                  >
+                    Solicitar consulta
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal de Reserva */}
+      <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Completa tu información</DialogTitle>
+            <DialogDescription>
+              Necesitamos algunos datos para agendar tu consulta con {lawyer.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Información personal */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Tus datos</h3>
+
+              <div>
+                <Label htmlFor="name">Nombre completo *</Label>
+                <Input
+                  id="name"
+                  placeholder="Tu nombre completo"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="age">Edad *</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  placeholder="Tu edad"
+                  value={clientAge}
+                  onChange={(e) => setClientAge(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Información del caso */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Sobre tu caso</h3>
+
+              <div>
+                <Label htmlFor="caseType">Tipo de caso *</Label>
+                <Select value={caseType} onValueChange={setCaseType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona el tipo de caso" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="civil">Civil - Contratos, responsabilidad civil</SelectItem>
+                    <SelectItem value="penal">Penal - Delitos, denuncias</SelectItem>
+                    <SelectItem value="laboral">Laboral - Despidos, condiciones laborales</SelectItem>
+                    <SelectItem value="familiar">Familiar - Divorcios, custodia, herencias</SelectItem>
+                    <SelectItem value="mercantil">Mercantil - Empresas, comercio</SelectItem>
+                    <SelectItem value="fiscal">Fiscal - Impuestos, tributos</SelectItem>
+                    <SelectItem value="inmobiliario">Inmobiliario - Propiedades, alquileres</SelectItem>
+                    <SelectItem value="administrativo">Administrativo - Trámites, recursos</SelectItem>
+                    <SelectItem value="unknown">No sé cual es mi tipo de caso</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Descripción del caso *</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe tu situación legal con el mayor detalle posible..."
+                  rows={4}
+                  value={caseDescription}
+                  onChange={(e) => setCaseDescription(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Incluye fechas, eventos importantes y cualquier información relevante
+                </p>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Selección de fecha y hora */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Agenda tu cita
+              </h3>
+
+              <div>
+                <Label className="mb-3 block">Selecciona un día *</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {availableSlots.map((slot, index) => (
+                    <Button
+                      key={index}
+                      variant={selectedDate === slot.date ? "default" : "outline"}
+                      onClick={() => {
+                        setSelectedDate(slot.date);
+                        setSelectedTime(""); // Reset time when changing date
+                      }}
+                      className="w-full text-xs"
+                    >
+                      {slot.date}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {selectedDate && (
+                <div>
+                  <Label className="mb-3 block">Selecciona un horario *</Label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {availableSlots
+                      .find(slot => slot.date === selectedDate)
+                      ?.times.map((time) => (
+                        <Button
+                          key={time}
+                          variant={selectedTime === time ? "default" : "outline"}
+                          onClick={() => setSelectedTime(time)}
+                          className="w-full text-xs"
+                        >
+                          {time}
+                        </Button>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Resumen */}
+            {canProceed() && (
+              <div className="bg-primary/5 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Resumen de tu consulta</h4>
+                <div className="text-sm space-y-1 text-muted-foreground">
+                  <p><strong>Tipo:</strong> {consultationType && consultationConfig[consultationType].label}</p>
+                  <p><strong>Fecha:</strong> {selectedDate} a las {selectedTime}</p>
+                  <p><strong>Precio:</strong> ${consultationType && lawyer.price[consultationType]}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Botón de continuar */}
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={handleSubmitBooking}
+              disabled={!canProceed()}
+            >
+              Continuar al pago
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chatbot Widget */}
+      <ChatbotWidget />
+    </div>
+  );
+}
