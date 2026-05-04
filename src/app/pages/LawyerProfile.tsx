@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Star,
   Award,
-  Languages,
   CheckCircle,
   Scale,
   Calendar,
@@ -198,7 +197,7 @@ export function LawyerProfile() {
             </Button>
             <div className="flex items-center gap-2">
               <Scale className="w-8 h-8 text-primary" />
-              <span className="text-xl font-semibold">LegalConnect</span>
+              <span className="text-xl font-semibold">Lexi</span>
             </div>
           </div>
         </div>
@@ -255,24 +254,6 @@ export function LawyerProfile() {
                           <p className="font-semibold">{lawyer.experience} años</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Languages className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Idiomas</p>
-                          <p className="font-semibold">
-                            {lawyer.languages.join(", ")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Separator className="my-6" />
-
-                    <div>
-                      <h3 className="font-semibold mb-2">Sobre mí</h3>
-                      <p className="text-muted-foreground">
-                        {lawyer.description}
-                      </p>
                     </div>
                   </div>
                 </div>

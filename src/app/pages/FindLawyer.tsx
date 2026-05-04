@@ -106,7 +106,7 @@ export function FindLawyer() {
             </Button>
             <div className="flex items-center gap-2">
               <Scale className="w-8 h-8 text-primary" />
-              <span className="text-xl font-semibold">LegalConnect</span>
+              <span className="text-xl font-semibold">Lexi</span>
             </div>
           </div>
         </div>

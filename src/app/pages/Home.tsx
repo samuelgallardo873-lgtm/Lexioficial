@@ -20,14 +20,11 @@ export function Home() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Scale className="w-8 h-8 text-primary" />
-            <span className="text-xl font-semibold">LegalConnect</span>
+            <span className="text-xl font-semibold">Lexi</span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <a href="#como-funciona" className="text-sm hover:text-primary">
               Cómo funciona
-            </a>
-            <a href="#especialidades" className="text-sm hover:text-primary">
-              Especialidades
             </a>
             <a href="#beneficios" className="text-sm hover:text-primary">
               Beneficios
@@ -265,7 +262,7 @@ export function Home() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 LegalConnect. Todos los derechos reservados.</p>
+          <p>© 2026 Lexi. Todos los derechos reservados.</p>
         </div>
       </footer>
 
