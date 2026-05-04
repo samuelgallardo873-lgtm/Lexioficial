@@ -210,50 +210,62 @@ export function LawyerProfile() {
             {/* Información básica */}
             <Card>
               <CardContent className="p-0">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="md:col-span-1 overflow-hidden rounded-l-lg">
                     <img
                       src={lawyer.image}
                       alt={lawyer.name}
-                      className="w-full h-full object-cover rounded-l-lg"
+                      className="w-full h-full object-cover"
                     />
                   </div>
-                  <div className="md:col-span-2 p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h1 className="text-3xl font-bold mb-2">
-                          {lawyer.name}
-                        </h1>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                          <span className="font-semibold text-lg">
-                            {lawyer.rating}
-                          </span>
-                          <span className="text-muted-foreground">
-                            ({lawyer.reviews} reseñas)
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {lawyer.specialty.map((spec) => (
-                        <Badge key={spec} className="capitalize">
-                          {spec}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="flex items-center gap-2">
-                        <Award className="w-5 h-5 text-primary" />
+                  <div className="md:col-span-1 p-6 flex flex-col justify-between h-full">
+                    <div>
+                      <div className="flex items-start justify-between mb-4">
                         <div>
-                          <p className="text-sm text-muted-foreground">
-                            Experiencia
-                          </p>
-                          <p className="font-semibold">{lawyer.experience} años</p>
+                          <h1 className="text-3xl font-bold mb-2">
+                            {lawyer.name}
+                          </h1>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                            <span className="font-semibold text-lg">
+                              {lawyer.rating}
+                            </span>
+                            <span className="text-muted-foreground">
+                              ({lawyer.reviews} reseñas)
+                            </span>
+                          </div>
                         </div>
                       </div>
+
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {lawyer.specialty.map((spec) => (
+                          <Badge key={spec} className="capitalize">
+                            {spec}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="flex items-center gap-2">
+                          <Award className="w-5 h-5 text-primary" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Experiencia
+                            </p>
+                            <p className="font-semibold">{lawyer.experience} años</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-3xl bg-muted/80 p-6 border border-border">
+                      <p className="text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                        Disponibilidad
+                      </p>
+                      <p className="text-lg font-semibold">{lawyer.availability}</p>
+                      <p className="text-sm text-muted-foreground mt-4">
+                        Agenda tu consulta fácil y rápido desde esta pantalla.
+                      </p>
                     </div>
                   </div>
                 </div>
