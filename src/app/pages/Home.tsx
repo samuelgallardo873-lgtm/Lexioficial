@@ -11,6 +11,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { ChatbotWidget } from "../components/ChatbotWidget";
+import { Footer } from "../components/Footer";
 
 export function Home() {
   return (
@@ -259,12 +260,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 Lexi. Todos los derechos reservados.</p>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Chatbot Widget */}
       <ChatbotWidget />

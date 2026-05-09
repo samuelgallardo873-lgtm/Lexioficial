@@ -21,6 +21,7 @@ import { LawyerCard } from "../components/LawyerCard";
 import { CaseMatchingForm } from "../components/CaseMatchingForm";
 import { Lawyer, specialties } from "../data/lawyers";
 import { ChatbotWidget } from "../components/ChatbotWidget";
+import { Footer } from "../components/Footer";
 import {
   matchLawyersToCase,
   generateMatchSummary,
@@ -334,6 +335,7 @@ export function FindLawyer() {
 
       {/* Chatbot Widget */}
       <ChatbotWidget />
+      <Footer />
     </div>
   );
 }

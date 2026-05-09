@@ -3,6 +3,7 @@ import { CheckCircle, Home, MessageSquare, ArrowLeft, Calendar, Clock } from "lu
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
+import { Footer } from "../components/Footer";
 
 const consultationConfig = {
   "oral-presencial": { label: "Oral presencial", emoji: "💬👤" },
@@ -180,6 +181,7 @@ export function ConfirmationPage() {
           </div>
         </CardContent>
       </Card>
+      <Footer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Separator } from "../components/ui/separator";
+import { Footer } from "../components/Footer";
 
 interface PaymentMethod {
   type: "credit" | "debit" | "pagofacil" | "rapipago";
@@ -365,6 +366,7 @@ export function PaymentPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

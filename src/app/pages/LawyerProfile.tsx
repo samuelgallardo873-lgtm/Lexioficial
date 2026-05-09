@@ -33,6 +33,7 @@ import {
 } from "../components/ui/dialog";
 import { ConsultationType, Lawyer } from "../data/lawyers";
 import { ChatbotWidget } from "../components/ChatbotWidget";
+import { Footer } from "../components/Footer";
 
 const consultationConfig = {
   "oral-presencial": {
@@ -601,6 +602,7 @@ export function LawyerProfile() {
 
       {/* Chatbot Widget */}
       <ChatbotWidget />
+      <Footer />
     </div>
   );
 }
