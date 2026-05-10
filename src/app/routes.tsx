@@ -4,6 +4,7 @@ import { FindLawyer } from "./pages/FindLawyer";
 import { LawyerProfile } from "./pages/LawyerProfile";
 import { PaymentPage } from "./pages/PaymentPage";
 import { ConfirmationPage } from "./pages/ConfirmationPage";
+import { LawyerOnboarding } from "./pages/LawyerOnboarding";
 
 export const router = createBrowserRouter([
   {
@@ -25,5 +26,9 @@ export const router = createBrowserRouter([
   {
     path: "/confirmation",
     Component: ConfirmationPage,
+  },
+  {
+    path: "/join-as-lawyer",
+    Component: LawyerOnboarding,
   },
 ]);
