@@ -30,9 +30,9 @@ export function Home() {
             <span className="text-2xl font-bold tracking-tighter">Lexi</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#como-funciona" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link to="/faq" className="text-sm font-medium hover:text-primary transition-colors">
               Cómo funciona
-            </a>
+            </Link>
             <a href="#beneficios" className="text-sm font-medium hover:text-primary transition-colors">
               Beneficios
             </a>
@@ -82,7 +82,7 @@ export function Home() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="rounded-full h-14 px-8 text-lg bg-background/50 backdrop-blur-sm" asChild>
-                <a href="#como-funciona">Ver cómo funciona</a>
+                <Link to="/faq">Ver cómo funciona</Link>
               </Button>
             </div>
 
