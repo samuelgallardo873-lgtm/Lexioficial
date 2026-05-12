@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Scale,
@@ -11,6 +12,8 @@ import {
   Gavel,
   Users,
   Building2,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -18,8 +21,25 @@ import { ChatbotWidget } from "../components/ChatbotWidget";
 import { Footer } from "../components/Footer";
 
 export function Home() {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    setIsDarkMode(document.documentElement.classList.contains('dark'));
+  }, []);
+
+  const toggleDarkMode = () => {
+    const root = document.documentElement;
+    if (root.classList.contains('dark')) {
+      root.classList.remove('dark');
+      setIsDarkMode(false);
+    } else {
+      root.classList.add('dark');
+      setIsDarkMode(true);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20">
+    <div className="min-h-screen bg-background selection:bg-primary/20 transition-colors duration-300">
       {/* Header */}
       <header className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -41,6 +61,9 @@ export function Home() {
             </a>
           </nav>
           <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="rounded-full">
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
             <Button asChild className="rounded-full px-6 shadow-lg shadow-primary/20">
               <Link to="/find-lawyer">Buscar abogado</Link>
             </Button>
@@ -53,11 +76,11 @@ export function Home() {
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="/hero_legal_modern_1778433221705.png" 
+            src={isDarkMode ? "/night_city_bg.png" : "/hero_legal_modern_1778433221705.png"} 
             alt="Modern Legal Office" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-opacity duration-500"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background transition-colors duration-500" />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
