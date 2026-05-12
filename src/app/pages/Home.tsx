@@ -62,10 +62,7 @@ export function Home() {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center animate-reveal">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6">
-              <Star className="w-3 h-3 fill-primary" />
-              La plataforma legal #1 de la región
-            </div>
+
             <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight leading-[1.1]">
               Tu asesoría legal, <br />
               <span className="text-primary italic">reinventada.</span>
@@ -86,20 +83,7 @@ export function Home() {
               </Button>
             </div>
 
-            {/* Stats */}
-            <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-border/50 pt-10">
-              {[
-                { label: "Abogados Activos", val: "+500" },
-                { label: "Casos Resueltos", val: "12k" },
-                { label: "Satisfacción", val: "99.2%" },
-                { label: "Atención", val: "24/7" },
-              ].map((stat, i) => (
-                <div key={i} className="text-center">
-                  <div className="text-3xl font-bold mb-1">{stat.val}</div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">{stat.label}</div>
-                </div>
-              ))}
-            </div>
+
           </div>
         </div>
       </section>
