@@ -20,6 +20,7 @@ import { toast } from "sonner";
 export function LawyerOnboarding() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -59,13 +60,14 @@ export function LawyerOnboarding() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSubmitError(null);
 
     try {
       // Formatear datos para el backend
       const dataToSend = {
         ...formData,
         experience: Number(formData.experience),
-        languages: formData.languages.split(",").map(l => l.trim()),
+        languages: formData.languages.split(",").map(l => l.trim()).filter(Boolean),
         price: Object.fromEntries(
           Object.entries(formData.price)
             .filter(([_, v]) => v !== "")
@@ -79,12 +81,21 @@ export function LawyerOnboarding() {
         body: JSON.stringify(dataToSend),
       });
 
-      if (!response.ok) throw new Error("Error al guardar los datos");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error del servidor (código ${response.status})`);
+      }
 
       setSuccess(true);
-      toast.success("¡Perfil actualizado con éxito!");
+      toast.success("¡Guardado en la base con éxito!", {
+        description: "El perfil del abogado fue registrado correctamente.",
+      });
     } catch (error) {
-      toast.error("Ocurrió un error al guardar los datos");
+      const msg = error instanceof Error ? error.message : "Error desconocido al guardar los datos";
+      setSubmitError(msg);
+      toast.error("No se pudo guardar el perfil", {
+        description: msg,
+      });
     } finally {
       setLoading(false);
     }
@@ -280,6 +291,17 @@ export function LawyerOnboarding() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Banner de error */}
+            {submitError && (
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive">
+                <span className="text-xl mt-0.5">❌</span>
+                <div>
+                  <p className="font-semibold text-sm">No se pudo guardar el perfil</p>
+                  <p className="text-sm opacity-80 mt-0.5">{submitError}</p>
+                </div>
+              </div>
+            )}
 
             <Button type="submit" className="w-full h-12 text-lg" disabled={loading}>
               {loading ? (

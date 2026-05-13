@@ -3,8 +3,6 @@ import mongoose from 'mongoose';
 const lawyerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   specialty: [{ type: String }],
-  rating: { type: Number, default: 0 },
-  reviews: { type: Number, default: 0 },
   experience: { type: Number },
   consultationType: [{ type: String }],
   price: {
@@ -17,7 +15,27 @@ const lawyerSchema = new mongoose.Schema({
   image: { type: String },
   description: { type: String },
   languages: [{ type: String }],
-  email: { type: String, unique: true }, // Added for lawyer identification
-}, { timestamps: true });
+  email: { type: String, unique: true },
+  reviews: [
+    {
+      name: { type: String, required: true },
+      rating: { type: Number, required: true, min: 1, max: 5 },
+      comment: { type: String, required: true },
+      date: { type: Date, default: Date.now }
+    }
+  ],
+  rating: { type: Number, default: 0 },
+  reviewsCount: { type: Number, default: 0 },
+}, { 
+  timestamps: true,
+  toJSON: {
+    transform: (doc, ret) => {
+      ret.id = ret._id.toString();
+      delete ret._id;
+      delete ret.__v;
+      return ret;
+    }
+  }
+});
 
 export const Lawyer = mongoose.model('Lawyer', lawyerSchema);

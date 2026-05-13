@@ -113,6 +113,54 @@ export function LawyerProfile() {
     fetchLawyer();
   }, [id]);
 
+  // Review form state
+  const [reviewName, setReviewName] = useState("");
+  const [reviewRating, setReviewRating] = useState("5");
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewName || !reviewComment) return;
+
+    setSubmittingReview(true);
+    try {
+      const response = await fetch(`/api/lawyers/${id}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: reviewName,
+          rating: Number(reviewRating),
+          comment: reviewComment,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Error al enviar reseña");
+
+      const data = await response.json();
+      
+      // Update local state
+      if (lawyer) {
+        setLawyer({
+          ...lawyer,
+          rating: data.rating,
+          reviewsCount: data.reviewsCount,
+          reviews: [data.review, ...lawyer.reviews],
+        });
+      }
+
+      // Reset form
+      setReviewName("");
+      setReviewComment("");
+      setReviewRating("5");
+    } catch (error) {
+      console.error(error);
+      alert("No se pudo enviar la reseña");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   useEffect(() => {
     if (!consultationType && lawyer?.consultationType.length) {
       setConsultationType(lawyer.consultationType[0]);
@@ -232,7 +280,7 @@ export function LawyerProfile() {
                               {lawyer.rating}
                             </span>
                             <span className="text-muted-foreground">
-                              ({lawyer.reviews} reseñas)
+                              ({lawyer.reviewsCount} reseñas)
                             </span>
                           </div>
                         </div>
@@ -318,54 +366,96 @@ export function LawyerProfile() {
                   <CardHeader>
                     <CardTitle>Reseñas de clientes</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {[
-                      {
-                        name: "Juan Pérez",
-                        rating: 5,
-                        comment:
-                          "Excelente profesional, resolvió mis dudas de manera clara y precisa.",
-                        date: "Hace 2 semanas",
-                      },
-                      {
-                        name: "María López",
-                        rating: 5,
-                        comment:
-                          "Muy recomendable, su experiencia se nota en cada consejo.",
-                        date: "Hace 1 mes",
-                      },
-                      {
-                        name: "Carlos Rodríguez",
-                        rating: 4,
-                        comment:
-                          "Buen servicio, respondió todas mis preguntas con paciencia.",
-                        date: "Hace 2 meses",
-                      },
-                    ].map((review, index) => (
-                      <div key={index} className="border-b pb-4 last:border-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="font-semibold">{review.name}</p>
-                          <span className="text-sm text-muted-foreground">
-                            {review.date}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-4 h-4 ${
-                                i < review.rating
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
+                  <CardContent className="space-y-6">
+                    {/* Formulario de nueva reseña */}
+                    <div className="bg-muted/30 p-6 rounded-xl border border-dashed border-border mb-8">
+                      <h4 className="font-bold mb-4">Deja tu opinión</h4>
+                      <form onSubmit={handleReviewSubmit} className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="rev-name">Tu nombre</Label>
+                            <Input
+                              id="rev-name"
+                              placeholder="Ej: Juan Pérez"
+                              required
+                              value={reviewName}
+                              onChange={(e) => setReviewName(e.target.value)}
                             />
-                          ))}
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="rev-rating">Calificación</Label>
+                            <Select value={reviewRating} onValueChange={setReviewRating}>
+                              <SelectTrigger id="rev-rating">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="5">⭐⭐⭐⭐⭐ (Excelente)</SelectItem>
+                                <SelectItem value="4">⭐⭐⭐⭐ (Muy bueno)</SelectItem>
+                                <SelectItem value="3">⭐⭐⭐ (Regular)</SelectItem>
+                                <SelectItem value="2">⭐⭐ (Malo)</SelectItem>
+                                <SelectItem value="1">⭐ (Muy malo)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {review.comment}
-                        </p>
-                      </div>
-                    ))}
+                        <div className="space-y-2">
+                          <Label htmlFor="rev-comment">Tu comentario</Label>
+                          <Textarea
+                            id="rev-comment"
+                            placeholder="Escribe aquí tu experiencia..."
+                            required
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                          />
+                        </div>
+                        <Button type="submit" disabled={submittingReview} className="w-full md:w-auto">
+                          {submittingReview ? "Enviando..." : "Publicar reseña"}
+                        </Button>
+                      </form>
+                    </div>
+
+                    <Separator />
+
+                    {/* Lista de reseñas reales */}
+                    <div className="space-y-6 pt-4">
+                      {lawyer.reviews && lawyer.reviews.length > 0 ? (
+                        lawyer.reviews.map((review, index) => (
+                          <div key={index} className="border-b pb-6 last:border-0">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="font-semibold text-lg">{review.name}</p>
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(review.date).toLocaleDateString('es-ES', { 
+                                  day: 'numeric', 
+                                  month: 'long', 
+                                  year: 'numeric' 
+                                })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 mb-3">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < review.rating
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "text-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <p className="text-muted-foreground leading-relaxed">
+                              {review.comment}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-muted-foreground italic">
+                            Aún no hay reseñas para este abogado. ¡Sé el primero en dejar una!
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

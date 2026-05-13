@@ -9,7 +9,13 @@ export interface Lawyer {
   name: string;
   specialty: string[];
   rating: number;
-  reviews: number;
+  reviewsCount: number;
+  reviews: {
+    name: string;
+    rating: number;
+    comment: string;
+    date: string | Date;
+  }[];
   experience: number;
   consultationType: ConsultationType[];
   price: {

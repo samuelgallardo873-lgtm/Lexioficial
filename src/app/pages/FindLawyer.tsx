@@ -30,23 +30,32 @@ export function FindLawyer() {
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     const fetchLawyers = async () => {
       try {
-        const response = await fetch("/api/lawyers");
+        const response = await fetch("/api/lawyers", { signal: controller.signal });
         if (!response.ok) {
           throw new Error("No se pudieron cargar los abogados");
         }
         const data = await response.json();
         setLawyers(data);
       } catch (error) {
-        setFetchError(
-          error instanceof Error ? error.message : "Error desconocido"
-        );
+        if (error instanceof Error && error.name === "AbortError") {
+          setFetchError("El servidor no responde. Asegúrate de que el backend está corriendo.");
+        } else {
+          setFetchError(
+            error instanceof Error ? error.message : "Error desconocido"
+          );
+        }
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
     };
     fetchLawyers();
+    return () => { clearTimeout(timeoutId); controller.abort(); };
   }, []);
 
   const filteredLawyers = lawyers.filter((lawyer) => {
@@ -63,18 +72,27 @@ export function FindLawyer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-lg font-medium">Cargando abogados...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-lg font-medium text-muted-foreground">Cargando abogados...</p>
       </div>
     );
   }
 
   if (fetchError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-lg font-medium text-destructive">
-          Error: {fetchError}
-        </p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 px-4 text-center">
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+          <span className="text-3xl">⚠️</span>
+        </div>
+        <p className="text-lg font-semibold text-destructive">No se pudo conectar al servidor</p>
+        <p className="text-sm text-muted-foreground max-w-sm">{fetchError}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 px-6 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+        >
+          Reintentar
+        </button>
       </div>
     );
   }
