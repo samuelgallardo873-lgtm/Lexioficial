@@ -10,10 +10,16 @@ export function Footer() {
           </p>
         </div>
         
-        <div className="pt-8 border-t border-slate-900 w-full">
+        <div className="pt-8 border-t border-slate-900 w-full flex flex-col items-center gap-3">
           <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">
             © 2026 Lexi. Todos los derechos reservados.
           </p>
+          <Link
+            to="/join-as-lawyer"
+            className="text-xs text-slate-700 hover:text-slate-500 transition-colors duration-200"
+          >
+            ¿Eres abogado? Únete a la plataforma
+          </Link>
         </div>
       </div>
     </footer>

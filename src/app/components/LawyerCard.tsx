@@ -33,7 +33,7 @@ export function LawyerCard({ lawyer, matchReasons }: LawyerCardProps) {
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span className="font-semibold">{lawyer.rating}</span>
               <span className="text-sm text-muted-foreground">
-                ({lawyer.reviews})
+                ({lawyer.reviewsCount})
               </span>
             </div>
           </div>
