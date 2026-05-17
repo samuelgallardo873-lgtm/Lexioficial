@@ -2,8 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import dns from 'dns';
 import { Lawyer } from './models/Lawyer.js';
 
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 dotenv.config();
 
 const app = express();
@@ -55,10 +57,14 @@ app.get('/api/lawyers/:id', async (req, res) => {
 app.post('/api/lawyers/update', async (req, res) => {
   try {
     const lawyerData = req.body;
-    const { email } = lawyerData;
+    const { email, matricula } = lawyerData;
 
     if (!email) {
       return res.status(400).json({ error: 'El email es requerido' });
+    }
+
+    if (!matricula) {
+      return res.status(400).json({ error: 'La matrícula profesional es requerida' });
     }
 
     const lawyer = await Lawyer.findOneAndUpdate(

@@ -7,6 +7,8 @@
 
   Run `npm install` to install the dependencies.
 
+  Copy `.env.example` to `.env` and replace `MONGO_URI` with your MongoDB Atlas connection string.
+
   Run `npm run dev` to start the React/Vite app and the Node.js backend together.
 
   If you only want the frontend, run `npm run dev:client`.

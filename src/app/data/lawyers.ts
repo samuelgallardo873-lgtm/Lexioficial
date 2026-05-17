@@ -7,6 +7,7 @@ export type ConsultationType =
 export interface Lawyer {
   id: string;
   name: string;
+  matricula?: string;
   specialty: string[];
   rating: number;
   reviewsCount: number;
