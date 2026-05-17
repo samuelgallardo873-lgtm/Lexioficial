@@ -153,6 +153,16 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60;
   }
 
+  .payment-page-bg {
+    background-image: url("/payment-bg-light.svg");
+    background-position: center;
+    background-size: cover;
+  }
+
+  .dark .payment-page-bg {
+    background-image: url("/payment-bg-dark.svg");
+  }
+
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }

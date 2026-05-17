@@ -91,9 +91,10 @@ export function PaymentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative payment-page-bg bg-cover bg-center bg-fixed text-foreground">
+      <div className="absolute inset-0 bg-background/80 dark:bg-background/90" />
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background z-10">
+      <header className="border-b sticky top-0 bg-background/90 dark:bg-background/80 backdrop-blur-md z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -107,13 +108,36 @@ export function PaymentPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Pago de Anticipo</h1>
-          <p className="text-muted-foreground">
-            Para confirmar tu consulta, abona el 25% del total
-          </p>
-        </div>
+      <main className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
+        <section className="mb-8 rounded-[2rem] border border-border bg-white/80 dark:bg-slate-950/80 shadow-2xl shadow-black/10 p-8 backdrop-blur-md">
+          <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] items-center">
+            <div>
+              <p className="text-sm uppercase tracking-[0.24em] text-primary/70 dark:text-primary/80 mb-2">Pago seguro</p>
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight">Confirma tu consulta con un pago rápido</h1>
+              <p className="mt-4 text-base text-muted-foreground max-w-2xl">
+                Abona el anticipo de tu consulta con el abogado seleccionado. El resto se paga después de la sesión, sin sorpresas.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <span className="rounded-full bg-primary/10 text-primary px-4 py-2 text-sm font-medium">Tarjeta y efectivo</span>
+                <span className="rounded-full bg-emerald-100 text-emerald-700 px-4 py-2 text-sm font-medium dark:bg-emerald-900/40 dark:text-emerald-300">Protección SSL</span>
+                <span className="rounded-full bg-slate-100 text-slate-800 px-4 py-2 text-sm font-medium dark:bg-slate-800/60 dark:text-slate-100">Confirmación instantánea</span>
+              </div>
+            </div>
+            <div className="rounded-[1.75rem] border border-border bg-background/80 p-6 shadow-lg">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Resumen rápido</p>
+              <div className="mt-6 space-y-4 text-sm text-muted-foreground">
+                <div className="rounded-3xl bg-primary/5 p-4 dark:bg-primary/10">
+                  <p className="font-medium text-foreground">Anticipo 25%</p>
+                  <p>Solo pagas la parte inicial para asegurar tu cita.</p>
+                </div>
+                <div className="rounded-3xl bg-secondary/10 p-4 dark:bg-secondary/15">
+                  <p className="font-medium text-foreground">Pago flexible</p>
+                  <p>Selecciona tarjeta o pago en efectivo con Pago Fácil/Rapipago.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Formulario de pago */}
@@ -365,7 +389,7 @@ export function PaymentPage() {
             </Card>
           </div>
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );
