@@ -24,6 +24,7 @@ export function LawyerOnboarding() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    matricula: "",
     experience: "",
     description: "",
     image: "",
@@ -180,6 +181,16 @@ export function LawyerOnboarding() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <Label htmlFor="matricula">Matrícula Profesional (Obligatoria)</Label>
+                    <Input
+                      id="matricula"
+                      placeholder="Ej: T° 123 F° 456 (CSJN)"
+                      required
+                      value={formData.matricula}
+                      onChange={(e) => setFormData({ ...formData, matricula: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="experience">Años de Experiencia</Label>
                     <Input
                       id="experience"
@@ -190,6 +201,9 @@ export function LawyerOnboarding() {
                       onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
                     />
                   </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="image">URL de Foto de Perfil</Label>
                     <Input
