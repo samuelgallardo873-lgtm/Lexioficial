@@ -6,6 +6,7 @@ import { PaymentPage } from "./pages/PaymentPage";
 import { ConfirmationPage } from "./pages/ConfirmationPage";
 import { LawyerOnboarding } from "./pages/LawyerOnboarding";
 import { FAQ } from "./pages/FAQ";
+import { AdminDashboard } from "./pages/AdminDashboard";
 
 export const router = createBrowserRouter([
   {
@@ -35,5 +36,9 @@ export const router = createBrowserRouter([
   {
     path: "/faq",
     Component: FAQ,
+  },
+  {
+    path: "/admin",
+    Component: AdminDashboard,
   },
 ]);

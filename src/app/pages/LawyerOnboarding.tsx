@@ -109,9 +109,9 @@ export function LawyerOnboarding() {
           <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-10 h-10 text-primary" />
           </div>
-          <CardTitle className="text-2xl mb-2">¡Todo listo!</CardTitle>
+          <CardTitle className="text-2xl mb-2">¡Perfil en revisión!</CardTitle>
           <CardDescription className="text-lg mb-8">
-            Tus datos han sido guardados en nuestra base de datos. Ahora los clientes podrán encontrarte en Lexi.
+            Tus datos han sido guardados. Un administrador validará tu matrícula antes de que el perfil sea publicado en Lexi.
           </CardDescription>
           <Button asChild className="w-full">
             <Link to="/">Ir al inicio</Link>
