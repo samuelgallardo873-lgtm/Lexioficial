@@ -27,7 +27,7 @@ app.get('/api/health', (req, res) => {
 app.get('/api/lawyers', async (req, res) => {
   try {
     const { specialty, consultationType, language } = req.query;
-    let query = {};
+    let query = { status: { $ne: 'pending' }, rating: { $exists: true } }; // fallback for existing records
 
     if (specialty) query.specialty = specialty;
     if (consultationType) query.consultationType = consultationType;
@@ -78,6 +78,36 @@ app.post('/api/lawyers/update', async (req, res) => {
     console.error('❌ Error al guardar abogado:', error);
     const msg = error.message || 'Error desconocido al guardar los datos';
     res.status(500).json({ error: msg });
+  }
+});
+
+// Admin endpoints
+app.get('/api/admin/lawyers/pending', async (req, res) => {
+  try {
+    const lawyers = await Lawyer.find({ status: 'pending' });
+    res.json(lawyers);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener abogados pendientes' });
+  }
+});
+
+app.post('/api/admin/lawyers/:id/approve', async (req, res) => {
+  try {
+    const lawyer = await Lawyer.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
+    if (!lawyer) return res.status(404).json({ error: 'Abogado no encontrado' });
+    res.json({ message: 'Abogado aprobado', lawyer });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al aprobar abogado' });
+  }
+});
+
+app.post('/api/admin/lawyers/:id/reject', async (req, res) => {
+  try {
+    const lawyer = await Lawyer.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true });
+    if (!lawyer) return res.status(404).json({ error: 'Abogado no encontrado' });
+    res.json({ message: 'Abogado rechazado', lawyer });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al rechazar abogado' });
   }
 });
 

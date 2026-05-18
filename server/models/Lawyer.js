@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const lawyerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   matricula: { type: String, required: true, unique: true },
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
   specialty: [{ type: String }],
   experience: { type: Number },
   consultationType: [{ type: String }],

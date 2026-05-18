@@ -8,6 +8,13 @@ export function Footer() {
           <p className="text-sm text-slate-400 max-w-xs">
             Conecta con profesionales legales de confianza en un solo lugar.
           </p>
+          <ul className="space-y-2 text-sm text-slate-400">
+            <li><Link to="/" className="hover:text-slate-200 transition-colors">Inicio</Link></li>
+            <li><Link to="/find-lawyer" className="hover:text-slate-200 transition-colors">Buscar Abogados</Link></li>
+            <li><Link to="/faq" className="hover:text-slate-200 transition-colors">Preguntas Frecuentes</Link></li>
+            <li><Link to="/join-as-lawyer" className="hover:text-slate-200 transition-colors">Soy Abogado</Link></li>
+            <li><Link to="/admin" className="hover:text-slate-200 transition-colors">Panel Admin</Link></li>
+          </ul>
         </div>
         
         <div className="pt-8 border-t border-slate-900 w-full flex flex-col items-center gap-3">

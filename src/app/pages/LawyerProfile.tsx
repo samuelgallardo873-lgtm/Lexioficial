@@ -262,7 +262,7 @@ export function LawyerProfile() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="md:col-span-1 overflow-hidden rounded-l-lg">
                     <img
-                      src={lawyer.image}
+                      src={lawyer.image || "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=300"}
                       alt={lawyer.name}
                       className="w-full h-full object-cover"
                     />
