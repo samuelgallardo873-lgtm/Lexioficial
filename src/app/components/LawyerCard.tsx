@@ -16,7 +16,7 @@ export function LawyerCard({ lawyer, matchReasons }: LawyerCardProps) {
       <CardContent className="p-0">
         <div className="aspect-[4/3] overflow-hidden">
           <img
-            src={lawyer.image}
+            src={lawyer.image || "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=300"}
             alt={lawyer.name}
             className="w-full h-full object-cover"
           />

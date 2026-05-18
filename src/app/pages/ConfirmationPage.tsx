@@ -59,7 +59,7 @@ export function ConfirmationPage() {
                 <p className="text-sm text-muted-foreground mb-1">Abogado</p>
                 <div className="flex items-center gap-3">
                   <img
-                    src={lawyer.image}
+                    src={lawyer.image || "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=300"}
                     alt={lawyer.name}
                     className="w-12 h-12 rounded-full object-cover"
                   />

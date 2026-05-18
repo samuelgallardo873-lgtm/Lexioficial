@@ -58,6 +58,28 @@ export function LawyerOnboarding() {
     }));
   };
 
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Imagen demasiado grande", {
+        description: "El tamaño máximo permitido es de 2MB.",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({
+        ...prev,
+        image: reader.result as string,
+      }));
+      toast.success("Foto cargada localmente con éxito");
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -203,16 +225,50 @@ export function LawyerOnboarding() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="image">URL de Foto de Perfil</Label>
-                    <Input
-                      id="image"
-                      placeholder="https://..."
-                      value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    />
+                <div className="space-y-4">
+                  <Label>Foto de Perfil (Opcional)</Label>
+                  <div className="grid md:grid-cols-2 gap-4 items-end">
+                    <div className="space-y-2">
+                      <Label htmlFor="image-file" className="text-xs text-muted-foreground">Subir archivo local</Label>
+                      <Input
+                        id="image-file"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileChange}
+                        className="cursor-pointer"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="image" className="text-xs text-muted-foreground">O pegar URL de imagen</Label>
+                      <Input
+                        id="image"
+                        placeholder="https://..."
+                        value={formData.image.startsWith("data:") ? "" : formData.image}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      />
+                    </div>
                   </div>
+                  {formData.image && (
+                    <div className="mt-2 flex items-center gap-4 p-3 border rounded-lg bg-background w-fit">
+                      <img
+                        src={formData.image}
+                        alt="Vista previa"
+                        className="w-16 h-16 object-cover rounded-full border"
+                      />
+                      <div>
+                        <p className="text-xs font-medium">Vista previa de tu foto</p>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs text-destructive h-auto p-0 mt-1"
+                          onClick={() => setFormData({ ...formData, image: "" })}
+                        >
+                          Quitar foto
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
