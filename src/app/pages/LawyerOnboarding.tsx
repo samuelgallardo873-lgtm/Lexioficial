@@ -86,6 +86,16 @@ export function LawyerOnboarding() {
     setSubmitError(null);
 
     try {
+      if (formData.consultationType.length === 0) {
+        throw new Error("Debes seleccionar al menos un tipo de consulta.");
+      }
+
+      for (const type of formData.consultationType) {
+        if (!formData.price[type as keyof typeof formData.price]) {
+          throw new Error("Debes definir el precio para todos los tipos de consulta que seleccionaste.");
+        }
+      }
+
       // Formatear datos para el backend
       const dataToSend = {
         ...formData,

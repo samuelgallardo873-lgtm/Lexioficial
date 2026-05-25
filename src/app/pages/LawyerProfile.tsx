@@ -339,7 +339,7 @@ export function LawyerProfile() {
                   <CardContent className="space-y-4">
                     {lawyer.consultationType.map((type) => {
                       const config = consultationConfig[type];
-                      const price = lawyer.price[type];
+                      const price = lawyer.price ? lawyer.price[type] : undefined;
 
                       return (
                         <div key={type} className="flex items-start gap-4 p-4 border rounded-lg">
@@ -352,7 +352,7 @@ export function LawyerProfile() {
                               {config.description}
                             </p>
                             <p className="text-lg font-semibold text-primary">
-                              ${price}/{type.includes("oral") ? "hora" : "consulta"}
+                              {price !== undefined ? `$${price}` : "Consultar"}/{type.includes("oral") ? "hora" : "consulta"}
                             </p>
                           </div>
                         </div>
@@ -480,7 +480,7 @@ export function LawyerProfile() {
                   >
                     {lawyer.consultationType.map((type) => {
                       const config = consultationConfig[type];
-                      const price = lawyer.price[type];
+                      const price = lawyer.price ? lawyer.price[type] : undefined;
 
                       return (
                         <div key={type} className="flex items-center space-x-2 border p-3 rounded-lg hover:border-primary transition-colors">
@@ -492,7 +492,7 @@ export function LawyerProfile() {
                                 <span className="text-sm">{config.label}</span>
                               </div>
                               <span className="font-semibold text-sm">
-                                ${price}
+                                {price !== undefined ? `$${price}` : "Consultar"}
                               </span>
                             </div>
                           </Label>
@@ -518,7 +518,7 @@ export function LawyerProfile() {
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-lg font-semibold">Precio:</span>
                     <span className="text-2xl font-bold text-primary">
-                      ${consultationType ? lawyer.price[consultationType] : "0"}
+                      ${consultationType && lawyer.price ? (lawyer.price[consultationType] ?? "0") : "0"}
                     </span>
                   </div>
                   <Button
@@ -672,7 +672,7 @@ export function LawyerProfile() {
                 <div className="text-sm space-y-1 text-muted-foreground">
                   <p><strong>Tipo:</strong> {consultationType && consultationConfig[consultationType].label}</p>
                   <p><strong>Fecha:</strong> {selectedDate} a las {selectedTime}</p>
-                  <p><strong>Precio:</strong> ${consultationType && lawyer.price[consultationType]}</p>
+                  <p><strong>Precio:</strong> ${consultationType && lawyer.price ? (lawyer.price[consultationType] ?? "0") : "0"}</p>
                 </div>
               </div>
             )}

@@ -99,7 +99,9 @@ export function LawyerCard({ lawyer, matchReasons }: LawyerCardProps) {
           <div className="text-sm mb-4">
             <span className="text-muted-foreground">Desde </span>
             <span className="font-semibold text-primary">
-              ${Math.min(...Object.values(lawyer.price).filter(p => p !== undefined) as number[])}
+              ${lawyer.price && Object.values(lawyer.price).filter(p => p !== undefined && p !== null).length > 0
+                ? Math.min(...Object.values(lawyer.price).filter(p => p !== undefined && p !== null) as number[])
+                : 0}
             </span>
           </div>
 

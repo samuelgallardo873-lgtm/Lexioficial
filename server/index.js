@@ -27,7 +27,7 @@ app.get('/api/health', (req, res) => {
 app.get('/api/lawyers', async (req, res) => {
   try {
     const { specialty, consultationType, language } = req.query;
-    let query = { status: { $ne: 'pending' }, rating: { $exists: true } }; // fallback for existing records
+    let query = { status: 'approved', rating: { $exists: true } }; // fallback for existing records
 
     if (specialty) query.specialty = specialty;
     if (consultationType) query.consultationType = consultationType;
@@ -67,6 +67,20 @@ app.post('/api/lawyers/update', async (req, res) => {
       return res.status(400).json({ error: 'La matrícula profesional es requerida' });
     }
 
+    if (!lawyerData.consultationType || lawyerData.consultationType.length === 0) {
+      return res.status(400).json({ error: 'Debes seleccionar al menos un tipo de consulta' });
+    }
+
+    if (!lawyerData.price) {
+      return res.status(400).json({ error: 'Faltan los precios de consulta' });
+    }
+
+    for (const type of lawyerData.consultationType) {
+      if (lawyerData.price[type] === undefined || lawyerData.price[type] === null || lawyerData.price[type] < 0) {
+        return res.status(400).json({ error: `Debes definir un precio válido para el tipo de consulta seleccionado.` });
+      }
+    }
+
     const lawyer = await Lawyer.findOneAndUpdate(
       { email },
       { $set: lawyerData },
@@ -82,9 +96,9 @@ app.post('/api/lawyers/update', async (req, res) => {
 });
 
 // Admin endpoints
-app.get('/api/admin/lawyers/pending', async (req, res) => {
+app.get('/api/admin/lawyers', async (req, res) => {
   try {
-    const lawyers = await Lawyer.find({ status: 'pending' });
+    const lawyers = await Lawyer.find({});
     res.json(lawyers);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener abogados pendientes' });
@@ -108,6 +122,16 @@ app.post('/api/admin/lawyers/:id/reject', async (req, res) => {
     res.json({ message: 'Abogado rechazado', lawyer });
   } catch (error) {
     res.status(500).json({ error: 'Error al rechazar abogado' });
+  }
+});
+
+app.delete('/api/admin/lawyers/:id', async (req, res) => {
+  try {
+    const lawyer = await Lawyer.findByIdAndDelete(req.params.id);
+    if (!lawyer) return res.status(404).json({ error: 'Abogado no encontrado' });
+    res.json({ message: 'Abogado eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar abogado' });
   }
 });
 

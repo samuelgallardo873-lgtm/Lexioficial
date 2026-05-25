@@ -56,7 +56,7 @@ export function PaymentPage() {
     );
   }
 
-  const consultationPrice = lawyer.price[consultationType];
+  const consultationPrice = lawyer.price ? (lawyer.price[consultationType] || 0) : 0;
   const depositAmount = consultationPrice * 0.25;
 
   const paymentMethods: PaymentMethod[] = [
