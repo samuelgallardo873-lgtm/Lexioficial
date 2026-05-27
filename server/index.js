@@ -4,12 +4,17 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import dns from 'dns';
 import { Lawyer } from './models/Lawyer.js';
-
+import { MercadoPagoConfig, Preference } from 'mercadopago';
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
+
+// Configuración de Mercado Pago
+const mpClient = new MercadoPagoConfig({ 
+  accessToken: process.env.ACCESS_TOKEN || 'TEST-8260173256053336-052620-e291cc7f407a51cc24de63004bb15e21-1829038237' 
+});
 
 app.use(cors());
 app.use(express.json());
@@ -164,6 +169,52 @@ app.post('/api/lawyers/:id/reviews', async (req, res) => {
 app.post('/api/bookings', (req, res) => {
   const booking = req.body;
   res.status(201).json({ message: 'Reserva recibida', booking });
+});
+
+// Mercado Pago Integration
+app.post('/api/create_preference', async (req, res) => {
+  try {
+    const { title, price, quantity } = req.body;
+    
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const successUrl = `${clientUrl}/confirmation`;
+    const failureUrl = `${clientUrl}/payment`;
+    const pendingUrl = `${clientUrl}/payment`;
+
+    const body = {
+      items: [
+        {
+          title: title || "Anticipo de Consulta Legal",
+          quantity: Number(quantity) || 1,
+          unit_price: Number(price),
+          currency_id: "ARS",
+        },
+      ],
+      back_urls: {
+        success: successUrl,
+        failure: failureUrl,
+        pending: pendingUrl,
+      },
+    };
+
+    // Mercado Pago strictly requires a public URL for auto_return: "approved"
+    // If the success URL contains "localhost" or "127.0.0.1", we must omit auto_return to avoid 400 Bad Request errors.
+    if (!successUrl.includes("localhost") && !successUrl.includes("127.0.0.1")) {
+      body.auto_return = "approved";
+    }
+
+    const preference = new Preference(mpClient);
+    const result = await preference.create({ body });
+    
+    // Intelligently select between live checkout (init_point) and sandbox checkout (sandbox_init_point)
+    const isProduction = process.env.ACCESS_TOKEN && process.env.ACCESS_TOKEN.startsWith('APP_USR');
+    const paymentUrl = isProduction ? result.init_point : (result.sandbox_init_point || result.init_point);
+
+    res.json({ id: result.id, init_point: paymentUrl });
+  } catch (error) {
+    console.error("Error al crear la preferencia de Mercado Pago:", error);
+    res.status(500).json({ error: "No se pudo generar el link de pago", details: error.message || error });
+  }
 });
 
 app.listen(port, () => {

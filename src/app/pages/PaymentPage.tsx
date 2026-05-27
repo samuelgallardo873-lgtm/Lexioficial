@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, CheckCircle, Shield, Scale, Calendar, Clock } from "lucide-react";
+import { 
+  ArrowLeft, 
+  CheckCircle, 
+  Shield, 
+  Scale, 
+  Calendar, 
+  Clock, 
+  User, 
+  FileText, 
+  Lock, 
+  ShieldCheck, 
+  ChevronRight, 
+  CreditCard 
+} from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Separator } from "../components/ui/separator";
 import { Footer } from "../components/Footer";
-
-interface PaymentMethod {
-  type: "credit" | "debit" | "pagofacil" | "rapipago";
-  label: string;
-  icon: string;
-}
 
 const consultationConfig = {
   "oral-presencial": { label: "Oral presencial", emoji: "💬👤" },
@@ -36,21 +40,25 @@ export function PaymentPage() {
     selectedTime,
   } = location.state || {};
 
-  const [paymentMethod, setPaymentMethod] = useState<string>("credit");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [dni, setDni] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   if (!lawyer) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground mb-4">No hay información de pago</p>
-          <Button asChild>
-            <Link to="/find-lawyer">Volver a búsqueda</Link>
-          </Button>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <Card className="p-8 text-center max-w-md mx-auto shadow-2xl border-none rounded-[2rem] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+          <CardContent className="pt-6">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 dark:text-red-400">
+              <Shield className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Sin información de pago</h3>
+            <p className="text-muted-foreground mb-6">No se encontraron detalles de la reserva activa para procesar el cobro.</p>
+            <Button asChild className="w-full rounded-2xl py-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
+              <Link to="/find-lawyer">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver a búsqueda
+              </Link>
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );
@@ -59,16 +67,10 @@ export function PaymentPage() {
   const consultationPrice = lawyer.price ? (lawyer.price[consultationType] || 0) : 0;
   const depositAmount = consultationPrice * 0.25;
 
-  const paymentMethods: PaymentMethod[] = [
-    { type: "credit", label: "Tarjeta de Crédito", icon: "💳" },
-    { type: "debit", label: "Tarjeta de Débito", icon: "💳" },
-    { type: "pagofacil", label: "Pago Fácil", icon: "🏪" },
-    { type: "rapipago", label: "Rapipago", icon: "🏪" },
-  ];
-
-  const handlePayment = () => {
-    navigate("/confirmation", {
-      state: {
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    try {
+      sessionStorage.setItem('lexi_last_booking', JSON.stringify({
         lawyer,
         consultationType,
         caseDescription,
@@ -78,319 +80,299 @@ export function PaymentPage() {
         selectedDate,
         selectedTime,
         paymentAmount: depositAmount,
-        paymentMethod,
-      },
-    });
-  };
+      }));
 
-  const canProceed = () => {
-    if (paymentMethod === "credit" || paymentMethod === "debit") {
-      return cardNumber.length >= 16 && cardName.trim() && expiryDate.length >= 5 && cvv.length >= 3;
+      const response = await fetch('http://localhost:4000/api/create_preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `Anticipo de Consulta - Abogado ${lawyer.name}`,
+          price: depositAmount,
+          quantity: 1
+        })
+      });
+
+      if (!response.ok) throw new Error('Error al crear preferencia');
+      const data = await response.json();
+      window.location.href = data.init_point;
+    } catch (error) {
+      console.error(error);
+      alert("Hubo un error al conectar con Mercado Pago");
+    } finally {
+      setIsProcessing(false);
     }
-    return dni.trim().length > 0;
   };
 
   return (
     <div className="min-h-screen relative payment-page-bg bg-cover bg-center bg-fixed text-foreground">
-      <div className="absolute inset-0 bg-background/80 dark:bg-background/90" />
-      {/* Header */}
-      <header className="border-b sticky top-0 bg-background/90 dark:bg-background/80 backdrop-blur-md z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      {/* Soft overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/80 to-background/95 dark:from-background/80 dark:via-background/90 dark:to-background/98" />
+      
+      {/* Premium Glassmorphic Header */}
+      <header className="border-b border-border/40 sticky top-0 bg-background/70 dark:bg-background/60 backdrop-blur-xl z-20 transition-all duration-300">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between max-w-6xl">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-              <ArrowLeft className="w-5 h-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate(-1)}
+              className="rounded-full hover:bg-muted/80 dark:hover:bg-slate-800/80 transition-colors w-10 h-10"
+            >
+              <ArrowLeft className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
             </Button>
             <div className="flex items-center gap-2">
-              <Scale className="w-8 h-8 text-primary" />
-              <span className="text-xl font-semibold">Lexi</span>
+              <div className="bg-primary text-primary-foreground p-1.5 rounded-xl shadow-md">
+                <Scale className="w-6 h-6" />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-gradient">Lexi</span>
             </div>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-muted-foreground bg-muted/60 dark:bg-slate-800/60 px-4 py-2 rounded-full border border-border/30">
+            <span>Datos</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-primary font-bold">Pago Seguro</span>
+            <ChevronRight className="w-3 h-3" />
+            <span>Confirmación</span>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
-        <section className="mb-8 rounded-[2rem] border border-border bg-white/80 dark:bg-slate-950/80 shadow-2xl shadow-black/10 p-8 backdrop-blur-md">
-          <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] items-center">
-            <div>
-              <p className="text-sm uppercase tracking-[0.24em] text-primary/70 dark:text-primary/80 mb-2">Pago seguro</p>
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight">Confirma tu consulta con un pago rápido</h1>
-              <p className="mt-4 text-base text-muted-foreground max-w-2xl">
-                Abona el anticipo de tu consulta con el abogado seleccionado. El resto se paga después de la sesión, sin sorpresas.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <span className="rounded-full bg-primary/10 text-primary px-4 py-2 text-sm font-medium">Tarjeta y efectivo</span>
-                <span className="rounded-full bg-emerald-100 text-emerald-700 px-4 py-2 text-sm font-medium dark:bg-emerald-900/40 dark:text-emerald-300">Protección SSL</span>
-                <span className="rounded-full bg-slate-100 text-slate-800 px-4 py-2 text-sm font-medium dark:bg-slate-800/60 dark:text-slate-100">Confirmación instantánea</span>
-              </div>
-            </div>
-            <div className="rounded-[1.75rem] border border-border bg-background/80 p-6 shadow-lg">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Resumen rápido</p>
-              <div className="mt-6 space-y-4 text-sm text-muted-foreground">
-                <div className="rounded-3xl bg-primary/5 p-4 dark:bg-primary/10">
-                  <p className="font-medium text-foreground">Anticipo 25%</p>
-                  <p>Solo pagas la parte inicial para asegurar tu cita.</p>
-                </div>
-                <div className="rounded-3xl bg-secondary/10 p-4 dark:bg-secondary/15">
-                  <p className="font-medium text-foreground">Pago flexible</p>
-                  <p>Selecciona tarjeta o pago en efectivo con Pago Fácil/Rapipago.</p>
-                </div>
-              </div>
-            </div>
+      <main className="relative z-10 container mx-auto px-6 py-10 max-w-6xl">
+        {/* Modern Welcome Banner */}
+        <section className="mb-10 rounded-[2.5rem] border border-white/20 dark:border-slate-800/40 bg-white/40 dark:bg-slate-950/40 shadow-2xl p-8 md:p-10 backdrop-blur-xl relative overflow-hidden transition-all duration-500 hover:shadow-black/5">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 px-4 py-1.5 text-xs font-semibold tracking-wider uppercase mb-4 shadow-sm border border-emerald-200/30">
+              <ShieldCheck className="w-4 h-4" /> Pasarela Encriptada SSL
+            </span>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight text-gradient mb-4">
+              Completa tu consulta con un pago seguro
+            </h1>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+              Abonas solo el 25% de anticipo para garantizar la reserva del abogado. El 75% restante se salda directamente después de la sesión legal, sin cargos sorpresa.
+            </p>
           </div>
         </section>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Formulario de pago */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Método de pago */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Método de pago</CardTitle>
+        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-10 items-start">
+          {/* Main Info Area (Left Column) */}
+          <div className="space-y-8">
+            {/* The Luxury Booking ticket */}
+            <Card className="border border-border/40 shadow-xl rounded-[2rem] overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl relative">
+              <div className="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-500" />
+              <CardHeader className="pt-8 px-8 pb-4">
+                <CardTitle className="text-lg font-bold tracking-tight text-muted-foreground uppercase">Resumen del Turno</CardTitle>
               </CardHeader>
-              <CardContent>
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <div className="grid grid-cols-2 gap-4">
-                    {paymentMethods.map((method) => (
-                      <div
-                        key={method.type}
-                        className="flex items-center space-x-2 border p-4 rounded-lg hover:border-primary transition-colors"
-                      >
-                        <RadioGroupItem value={method.type} id={method.type} />
-                        <Label htmlFor={method.type} className="flex-1 cursor-pointer">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">{method.icon}</span>
-                            <span>{method.label}</span>
-                          </div>
-                        </Label>
-                      </div>
-                    ))}
+              <CardContent className="px-8 pb-8 space-y-6">
+                
+                {/* Lawyer Portrait Card */}
+                <div className="flex flex-col sm:flex-row gap-5 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-border/30">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-md flex-shrink-0 border-2 border-white dark:border-slate-800">
+                    <img 
+                      src={lawyer.image || "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&q=80&w=300"} 
+                      alt={lawyer.name} 
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
-                </RadioGroup>
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xl font-bold">{lawyer.name}</span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                        Verificado
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Especialista en Derecho Legal</p>
+                    <div className="flex flex-wrap gap-1.5 pt-1.5">
+                      {lawyer.specialty && lawyer.specialty.slice(0, 3).map((spec: string) => (
+                        <span key={spec} className="px-2.5 py-0.5 rounded-lg text-xs font-medium bg-muted text-muted-foreground capitalize border border-border/20">
+                          {spec}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Consultation Details Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl border border-border/30 bg-background/50 space-y-1">
+                    <span className="text-xs text-muted-foreground block">CLIENTE</span>
+                    <div className="flex items-center gap-2 font-semibold">
+                      <User className="w-4 h-4 text-primary/70" />
+                      <span>{clientName}</span>
+                      {clientAge && <span className="text-xs text-muted-foreground">({clientAge} años)</span>}
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-border/30 bg-background/50 space-y-1">
+                    <span className="text-xs text-muted-foreground block">TIPO DE CONSULTA</span>
+                    <div className="flex items-center gap-2 font-semibold">
+                      <span className="text-lg">
+                        {consultationConfig[consultationType]?.emoji || "💬"}
+                      </span>
+                      <span>{consultationConfig[consultationType]?.label || "Consulta Legal"}</span>
+                    </div>
+                  </div>
+
+                  {selectedDate && selectedTime && (
+                    <div className="p-4 rounded-xl border border-border/30 bg-background/50 space-y-1 sm:col-span-2">
+                      <span className="text-xs text-muted-foreground block">AGENDA PROGRAMADA</span>
+                      <div className="flex flex-wrap items-center gap-4 text-sm font-bold text-primary">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-4 h-4 text-indigo-500" />
+                          <span>{selectedDate}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-4 h-4 text-indigo-500" />
+                          <span>{selectedTime} hs</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Case dossier description */}
+                {caseDescription && (
+                  <div className="p-5 rounded-2xl border border-dashed border-border/80 bg-amber-50/20 dark:bg-amber-950/5 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-amber-800 dark:text-amber-300">
+                      <FileText className="w-4 h-4" />
+                      <span>SINOPSIS DEL CASO O CONSULTA</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed italic">
+                      "{caseDescription}"
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Detalles del pago */}
-            {(paymentMethod === "credit" || paymentMethod === "debit") && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Información de la tarjeta</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="cardNumber">Número de tarjeta *</Label>
-                    <Input
-                      id="cardNumber"
-                      type="text"
-                      placeholder="1234 5678 9012 3456"
-                      value={cardNumber}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, "");
-                        setCardNumber(value.slice(0, 16));
-                      }}
-                      maxLength={16}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cardName">Nombre del titular *</Label>
-                    <Input
-                      id="cardName"
-                      type="text"
-                      placeholder="Como aparece en la tarjeta"
-                      value={cardName}
-                      onChange={(e) => setCardName(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="expiryDate">Fecha de vencimiento *</Label>
-                      <Input
-                        id="expiryDate"
-                        type="text"
-                        placeholder="MM/AA"
-                        value={expiryDate}
-                        onChange={(e) => {
-                          let value = e.target.value.replace(/\D/g, "");
-                          if (value.length >= 2) {
-                            value = value.slice(0, 2) + "/" + value.slice(2, 4);
-                          }
-                          setExpiryDate(value.slice(0, 5));
-                        }}
-                        maxLength={5}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="cvv">CVV *</Label>
-                      <Input
-                        id="cvv"
-                        type="text"
-                        placeholder="123"
-                        value={cvv}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "");
-                          setCvv(value.slice(0, 4));
-                        }}
-                        maxLength={4}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Official Mercado Pago Integration Card */}
+            <Card className="border border-border/40 shadow-xl rounded-[2rem] overflow-hidden bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl">
+              <CardHeader className="pt-8 px-8">
+                <CardTitle className="flex items-center gap-3 text-xl font-bold">
+                  <span className="text-2xl">💳</span> Medio de Pago Oficial
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-8 pb-8 space-y-6">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Serás redirigido con total seguridad al checkout oficial de **Mercado Pago** para completar tu anticipo. Podrás pagar usando dinero en cuenta, tarjetas de débito/crédito, o efectivo en Pago Fácil y Rapipago.
+                </p>
 
-            {(paymentMethod === "pagofacil" || paymentMethod === "rapipago") && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Información de pago</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="dni">DNI del pagador *</Label>
-                    <Input
-                      id="dni"
-                      type="text"
-                      placeholder="12345678"
-                      value={dni}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, "");
-                        setDni(value);
-                      }}
+                {/* Interactive Premium Selection Panel */}
+                <div className="flex flex-col sm:flex-row items-center gap-6 bg-slate-50 dark:bg-slate-950/70 p-5 rounded-2xl border border-primary/20 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/5 rounded-full blur-xl pointer-events-none" />
+                  <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border shadow-inner flex items-center justify-center w-16 h-16 flex-shrink-0">
+                    <img 
+                      src="https://logospng.org/download/mercado-pago/logo-mercado-pago-icon-1024.png" 
+                      alt="Mercado Pago" 
+                      className="h-10 w-10 object-contain" 
                     />
                   </div>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-900 mb-2 font-semibold">
-                      Instrucciones de pago
-                    </p>
-                    <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                      <li>Recibirás un código de pago por email</li>
-                      <li>Acércate a cualquier local de {paymentMethod === "pagofacil" ? "Pago Fácil" : "Rapipago"}</li>
-                      <li>Presenta el código y abona el monto indicado</li>
-                      <li>Recibirás la confirmación una vez procesado el pago</li>
-                    </ol>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Seguridad */}
-            <Card className="bg-muted/50">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-green-600" />
-                  <div>
-                    <p className="font-semibold text-sm">Pago 100% seguro</p>
-                    <p className="text-xs text-muted-foreground">
-                      Tus datos están protegidos con encriptación SSL
+                  <div className="flex-1 text-center sm:text-left space-y-1">
+                    <div className="flex items-center justify-center sm:justify-start gap-2">
+                      <p className="font-bold text-base">Checkout Pro de Mercado Pago</p>
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      El saldo restante (${consultationPrice - depositAmount}) se abonará tras la cita de forma flexible.
                     </p>
                   </div>
+                </div>
+
+                {/* Security trust badge */}
+                <div className="flex items-center gap-3 bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 text-emerald-950 dark:text-emerald-300">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <p className="text-xs font-semibold leading-relaxed">
+                    Protección SSL avanzada: Lexi nunca almacena ni tiene acceso a los datos de tu tarjeta de crédito o claves bancarias.
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Resumen del pedido */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle>Resumen</CardTitle>
+          {/* Floating Receipt Column (Right Column) */}
+          <div className="lg:col-span-1 lg:sticky lg:top-24 space-y-6">
+            <Card className="border border-border/40 shadow-2xl rounded-[2.25rem] overflow-hidden bg-white/80 dark:bg-slate-900/85 backdrop-blur-xl relative">
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-indigo-600 to-primary" />
+              <CardHeader className="pt-8 px-8 pb-4">
+                <CardTitle className="text-lg font-bold tracking-wider text-muted-foreground uppercase text-center">Facturación</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Abogado</p>
-                  <p className="font-semibold">{lawyer.name}</p>
-                </div>
-
-                <Separator />
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Cliente</p>
-                  <p className="font-semibold">{clientName}</p>
-                  {clientAge && <p className="text-sm text-muted-foreground">{clientAge} años</p>}
-                </div>
-
-                <Separator />
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Tipo de consulta</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">
-                      {consultationConfig[consultationType]?.emoji}
-                    </span>
-                    <p className="font-semibold">{consultationConfig[consultationType]?.label}</p>
+              <CardContent className="px-8 pb-8 space-y-6">
+                
+                {/* Cost Breakdown */}
+                <div className="space-y-3.5 text-sm pt-2">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Precio total de consulta:</span>
+                    <span className="font-medium text-foreground">${consultationPrice}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Anticipo obligatorio (25%):</span>
+                    <span className="font-semibold text-foreground">${depositAmount}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Saldo pendiente posterior:</span>
+                    <span className="font-medium text-foreground">${consultationPrice - depositAmount}</span>
                   </div>
                 </div>
 
-                {selectedDate && selectedTime && (
-                  <>
-                    <Separator />
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Fecha y hora</p>
-                      <div className="flex items-center gap-2 text-sm mb-1">
-                        <Calendar className="w-4 h-4 text-primary" />
-                        <span className="font-semibold">{selectedDate}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="w-4 h-4 text-primary" />
-                        <span className="font-semibold">{selectedTime}</span>
-                      </div>
-                    </div>
-                  </>
-                )}
+                <div className="border-t border-dashed border-border/60 my-4" />
 
-                {caseType && (
-                  <>
-                    <Separator />
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Tipo de caso</p>
-                      <p className="font-semibold capitalize">{caseType === 'unknown' ? 'Por determinar' : caseType}</p>
-                    </div>
-                  </>
-                )}
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Precio total consulta:</span>
-                    <span>${consultationPrice}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Anticipo (25%):</span>
-                    <span className="font-semibold">${depositAmount}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Saldo restante:</span>
-                    <span>${consultationPrice - depositAmount}</span>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-lg font-semibold">A pagar ahora:</span>
-                  <span className="text-2xl font-bold text-primary">
+                {/* Highlighted To Pay Box */}
+                <div className="rounded-2xl bg-gradient-to-br from-indigo-50/70 to-purple-50/50 dark:from-indigo-950/30 dark:to-purple-950/20 p-5 border border-indigo-100/50 dark:border-indigo-950/40 text-center space-y-1 shadow-sm">
+                  <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-widest block">Total a Abonar Hoy</span>
+                  <p className="text-4xl font-extrabold text-indigo-950 dark:text-indigo-100 tracking-tight">
                     ${depositAmount}
-                  </span>
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    ARS (Pesos Argentinos)
+                  </p>
                 </div>
 
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handlePayment}
-                  disabled={!canProceed()}
-                >
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  Confirmar pago
-                </Button>
+                {/* Master Action Button */}
+                <div className="space-y-3 pt-2">
+                  <Button
+                    className="w-full relative overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 hover:from-indigo-500 hover:via-indigo-600 hover:to-indigo-700 text-white font-bold text-base py-6.5 rounded-2xl shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer hover:shadow-indigo-500/25 group border-none"
+                    onClick={handlePayment}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Conectando con Mercado Pago...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        <Lock className="w-4 h-4 group-hover:translate-y-[-1px] transition-transform" />
+                        Pagar Anticipo Seguro con MP
+                      </span>
+                    )}
+                  </Button>
 
-                <p className="text-xs text-muted-foreground text-center">
-                  El saldo restante se abonará después de la consulta
-                </p>
+                  <p className="text-[11px] text-muted-foreground text-center leading-relaxed max-w-[280px] mx-auto">
+                    Al confirmar, serás redirigido a la pasarela externa de Mercado Pago. Puedes cancelar la operación en cualquier momento.
+                  </p>
+                </div>
               </CardContent>
             </Card>
+
+            {/* Quick trust highlights */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-border/30 rounded-2xl p-4 flex flex-col items-center justify-center text-center space-y-1 shadow-sm">
+                <span className="text-xl">🔐</span>
+                <p className="text-xs font-bold text-foreground">Conexión Segura</p>
+                <p className="text-[10px] text-muted-foreground">SSL 256 Bits</p>
+              </div>
+              <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-border/30 rounded-2xl p-4 flex flex-col items-center justify-center text-center space-y-1 shadow-sm">
+                <span className="text-xl">💳</span>
+                <p className="text-xs font-bold text-foreground">Múltiples Medios</p>
+                <p className="text-[10px] text-muted-foreground">Débito, Crédito o Efectivo</p>
+              </div>
+            </div>
           </div>
         </div>
       </main>
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 }
