@@ -82,13 +82,24 @@ export function CaseMatchingForm({ onComplete }: CaseMatchingFormProps) {
   const canProceed = () => {
     switch (step) {
       case 1:
-        return formData.name && formData.age && formData.city && formData.country;
+        return (
+          formData.name.trim() !== "" &&
+          Number(formData.age) >= 18 &&
+          Number(formData.age) <= 120 &&
+          formData.city.trim() !== "" &&
+          formData.country.trim() !== ""
+        );
       case 2:
         return (
-          formData.caseTitle && formData.caseType && formData.caseDescription
+          formData.caseTitle.trim() !== "" &&
+          formData.caseType &&
+          formData.caseDescription.trim() !== ""
         );
       case 3:
-        return true; // Opcional
+        if (formData.hasAmount) {
+          return formData.amountInvolved !== "" && Number(formData.amountInvolved) >= 0;
+        }
+        return true;
       case 4:
         return formData.urgency && formData.contactMethod && formData.availability;
       default:
@@ -138,10 +149,15 @@ export function CaseMatchingForm({ onComplete }: CaseMatchingFormProps) {
               <Input
                 id="age"
                 type="number"
+                min="18"
+                max="120"
                 value={formData.age}
                 onChange={(e) => updateFormData("age", e.target.value)}
                 placeholder="Ej: 35"
               />
+              {formData.age && (Number(formData.age) < 18 || Number(formData.age) > 120) && (
+                <p className="text-xs text-destructive mt-1">La edad debe estar entre 18 y 120 años.</p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -260,6 +276,7 @@ export function CaseMatchingForm({ onComplete }: CaseMatchingFormProps) {
                   }
                   placeholder="Ej: 50000"
                   type="number"
+                  min="0"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   En tu moneda local

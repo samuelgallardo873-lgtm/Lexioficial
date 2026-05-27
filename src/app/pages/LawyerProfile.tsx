@@ -230,7 +230,16 @@ export function LawyerProfile() {
   };
 
   const canProceed = () => {
-    return clientName && clientAge && caseType && caseDescription && selectedDate && selectedTime;
+    return (
+      clientName.trim() !== "" && 
+      clientAge !== "" && 
+      Number(clientAge) >= 18 && 
+      Number(clientAge) <= 120 && 
+      caseType && 
+      caseDescription.trim() !== "" && 
+      selectedDate && 
+      selectedTime
+    );
   };
 
   return (
@@ -566,10 +575,15 @@ export function LawyerProfile() {
                 <Input
                   id="age"
                   type="number"
+                  min="18"
+                  max="120"
                   placeholder="Tu edad"
                   value={clientAge}
                   onChange={(e) => setClientAge(e.target.value)}
                 />
+                {clientAge && (Number(clientAge) < 18 || Number(clientAge) > 120) && (
+                  <p className="text-xs text-destructive mt-1">La edad debe estar entre 18 y 120 años.</p>
+                )}
               </div>
             </div>
 
