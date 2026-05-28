@@ -7,6 +7,7 @@ import { ConfirmationPage } from "./pages/ConfirmationPage";
 import { LawyerOnboarding } from "./pages/LawyerOnboarding";
 import { FAQ } from "./pages/FAQ";
 import { AdminDashboard } from "./pages/AdminDashboard";
+import { AdminLogin } from "./pages/AdminLogin";
 
 export const router = createBrowserRouter([
   {
@@ -30,7 +31,7 @@ export const router = createBrowserRouter([
     Component: ConfirmationPage,
   },
   {
-    path: "/join-as-lawyer",
+    path: "/registro-privado-abogados-2026",
     Component: LawyerOnboarding,
   },
   {
@@ -40,5 +41,9 @@ export const router = createBrowserRouter([
   {
     path: "/admin",
     Component: AdminDashboard,
+  },
+  {
+    path: "/admin/login",
+    Component: AdminLogin,
   },
 ]);

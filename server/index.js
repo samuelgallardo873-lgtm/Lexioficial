@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import dns from 'dns';
 import { Lawyer } from './models/Lawyer.js';
+import jwt from 'jsonwebtoken';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 dotenv.config();
@@ -101,7 +102,33 @@ app.post('/api/lawyers/update', async (req, res) => {
 });
 
 // Admin endpoints
-app.get('/api/admin/lawyers', async (req, res) => {
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (token == null) return res.status(401).json({ error: 'Token no proporcionado' });
+
+  jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err, user) => {
+    if (err) return res.status(403).json({ error: 'Token inválido o expirado' });
+    req.user = user;
+    next();
+  });
+};
+
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin';
+
+  if (username === adminUsername && password === adminPassword) {
+    const token = jwt.sign({ username }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
+    res.json({ token });
+  } else {
+    res.status(401).json({ error: 'Credenciales incorrectas' });
+  }
+});
+
+app.get('/api/admin/lawyers', authenticateToken, async (req, res) => {
   try {
     const lawyers = await Lawyer.find({});
     res.json(lawyers);
@@ -110,7 +137,7 @@ app.get('/api/admin/lawyers', async (req, res) => {
   }
 });
 
-app.post('/api/admin/lawyers/:id/approve', async (req, res) => {
+app.post('/api/admin/lawyers/:id/approve', authenticateToken, async (req, res) => {
   try {
     const lawyer = await Lawyer.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
     if (!lawyer) return res.status(404).json({ error: 'Abogado no encontrado' });
@@ -120,7 +147,7 @@ app.post('/api/admin/lawyers/:id/approve', async (req, res) => {
   }
 });
 
-app.post('/api/admin/lawyers/:id/reject', async (req, res) => {
+app.post('/api/admin/lawyers/:id/reject', authenticateToken, async (req, res) => {
   try {
     const lawyer = await Lawyer.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true });
     if (!lawyer) return res.status(404).json({ error: 'Abogado no encontrado' });
@@ -130,7 +157,7 @@ app.post('/api/admin/lawyers/:id/reject', async (req, res) => {
   }
 });
 
-app.delete('/api/admin/lawyers/:id', async (req, res) => {
+app.delete('/api/admin/lawyers/:id', authenticateToken, async (req, res) => {
   try {
     const lawyer = await Lawyer.findByIdAndDelete(req.params.id);
     if (!lawyer) return res.status(404).json({ error: 'Abogado no encontrado' });

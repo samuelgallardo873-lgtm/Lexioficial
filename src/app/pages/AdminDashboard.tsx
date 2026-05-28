@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Check, X, ShieldAlert, ShieldCheck, Loader2, Trash2 } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft, Check, X, ShieldAlert, ShieldCheck, Loader2, Trash2, LogOut } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -12,9 +12,26 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const fetchAllLawyers = async () => {
     try {
-      const response = await fetch("/api/admin/lawyers");
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        navigate("/admin/login");
+        return;
+      }
+
+      const response = await fetch("/api/admin/lawyers", {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("adminToken");
+        navigate("/admin/login");
+        return;
+      }
+
       if (!response.ok) throw new Error("Error fetching lawyers");
       const data = await response.json();
       setLawyers(data);
@@ -26,14 +43,21 @@ export function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchAllLawyers();
-  }, []);
+    const token = localStorage.getItem("adminToken");
+    if (!token) {
+      navigate("/admin/login");
+    } else {
+      fetchAllLawyers();
+    }
+  }, [navigate]);
 
   const handleAction = async (id: string, action: "approve" | "reject") => {
     setActionLoading(id);
     try {
+      const token = localStorage.getItem("adminToken");
       const response = await fetch(`/api/admin/lawyers/${id}/${action}`, {
         method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       if (!response.ok) throw new Error(`Error al ${action === "approve" ? "aprobar" : "rechazar"}`);
       
@@ -58,8 +82,10 @@ export function AdminDashboard() {
 
     setActionLoading(id);
     try {
+      const token = localStorage.getItem("adminToken");
       const response = await fetch(`/api/admin/lawyers/${id}`, {
         method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       if (!response.ok) throw new Error("Error al eliminar");
       
@@ -177,9 +203,22 @@ export function AdminDashboard() {
             </Button>
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-8 h-8 text-primary" />
-              <span className="text-xl font-semibold">Panel de Administración</span>
+              <span className="text-xl font-semibold hidden sm:inline">Panel de Administración</span>
             </div>
           </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              localStorage.removeItem("adminToken");
+              navigate("/admin/login");
+            }}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Cerrar sesión
+          </Button>
         </div>
       </header>
 
