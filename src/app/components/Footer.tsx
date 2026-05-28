@@ -19,6 +19,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-slate-400">
             <li><Link to="/" className="hover:text-slate-200 transition-colors">Inicio</Link></li>
             <li><Link to="/find-lawyer" className="hover:text-slate-200 transition-colors">Buscar Abogados</Link></li>
+            <li><Link to="/join" className="hover:text-amber-400 text-amber-500 font-medium transition-colors">¿Eres Abogado?</Link></li>
             <li><Link to="/faq" className="hover:text-slate-200 transition-colors">Preguntas Frecuentes</Link></li>
             {isAdmin && (
               <li className="pt-4">

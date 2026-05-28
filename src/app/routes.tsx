@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
     Component: ConfirmationPage,
   },
   {
-    path: "/registro-privado-abogados-2026",
+    path: "/join",
     Component: LawyerOnboarding,
   },
   {
