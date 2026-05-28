@@ -13,7 +13,7 @@ export function JoinPitch() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="bg-background border-b sticky top-0 z-10">
+      <header className="bg-background border-b sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Scale className="w-8 h-8 text-primary" />

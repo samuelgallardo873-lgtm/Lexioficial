@@ -160,7 +160,7 @@ export function LawyerOnboarding() {
 
   return (
     <div className="min-h-screen bg-muted/30 pb-12">
-      <header className="bg-background border-b sticky top-0 z-10">
+      <header className="bg-background border-b sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" asChild>
