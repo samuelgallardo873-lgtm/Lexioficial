@@ -8,6 +8,7 @@ import { LawyerOnboarding } from "./pages/LawyerOnboarding";
 import { FAQ } from "./pages/FAQ";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminLogin } from "./pages/AdminLogin";
+import { JoinPitch } from "./pages/JoinPitch";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
   {
     path: "/confirmation",
     Component: ConfirmationPage,
+  },
+  {
+    path: "/unete",
+    Component: JoinPitch,
   },
   {
     path: "/join",
