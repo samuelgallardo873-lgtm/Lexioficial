@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { scrollToTop } from "../../lib/scroll";
 import {
   Scale,
   ArrowLeft,
@@ -19,9 +20,7 @@ import { toast } from "sonner";
 
 export function LawyerOnboarding() {
   useEffect(() => {
-    setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    }, 10);
+    setTimeout(scrollToTop, 10);
   }, []);
 
   const [loading, setLoading] = useState(false);

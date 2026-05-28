@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { scrollToTop } from "../../lib/scroll";
 import { Scale, TrendingUp, ShieldCheck, Clock, ArrowRight } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -7,9 +8,7 @@ import { Footer } from "../components/Footer";
 
 export function JoinPitch() {
   useEffect(() => {
-    setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    }, 10);
+    setTimeout(scrollToTop, 10);
   }, []);
 
   return (
@@ -21,7 +20,7 @@ export function JoinPitch() {
             <span className="text-xl font-semibold">Lexi</span>
           </Link>
           <Button asChild variant="outline" className="hidden sm:inline-flex">
-            <Link to="/join" onClick={() => window.scrollTo(0, 0)}>Registrarse como Abogado</Link>
+            <Link to="/join" onClick={scrollToTop}>Registrarse como Abogado</Link>
           </Button>
         </div>
       </header>
@@ -43,7 +42,7 @@ export function JoinPitch() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/25">
-                <Link to="/join" onClick={() => window.scrollTo(0, 0)}>
+                <Link to="/join" onClick={scrollToTop}>
                   Llenar formulario de ingreso
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
