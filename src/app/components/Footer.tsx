@@ -34,11 +34,6 @@ export function Footer() {
           <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">
             © 2026 Lexi. Todos los derechos reservados.
           </p>
-          {!isAdmin && (
-            <Link to="/admin/login" className="absolute right-0 bottom-0 p-2 text-slate-800 hover:text-slate-600 transition-colors" title="Acceso Administrativo">
-              <Lock className="w-4 h-4" />
-            </Link>
-          )}
         </div>
       </div>
     </footer>

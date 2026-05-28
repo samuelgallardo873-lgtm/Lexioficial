@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ShieldAlert, Loader2, Lock } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { ShieldAlert, Loader2, Lock, ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { toast } from "sonner";
@@ -51,7 +51,18 @@ export function AdminLogin() {
 
       <Card className="w-full max-w-md shadow-2xl border-none rounded-[2rem] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl relative z-10 overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-2 bg-primary" />
-        <CardHeader className="pt-10 pb-6 text-center space-y-4">
+        <CardHeader className="pt-10 pb-6 text-center space-y-4 relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            asChild
+            className="absolute top-6 left-6 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <Link to="/">
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+            </Link>
+          </Button>
+          
           <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto shadow-inner border border-primary/20">
             <ShieldAlert className="w-10 h-10 text-primary" />
           </div>
