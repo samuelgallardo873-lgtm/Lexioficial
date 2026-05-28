@@ -21,9 +21,9 @@ export function Footer() {
             <li><Link to="/find-lawyer" className="hover:text-slate-200 transition-colors">Buscar Abogados</Link></li>
             <li><Link to="/faq" className="hover:text-slate-200 transition-colors">Preguntas Frecuentes</Link></li>
             {isAdmin && (
-              <li className="pt-2">
-                <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-semibold border border-primary/20">
-                  <ShieldAlert className="w-4 h-4" /> Panel de Control
+              <li className="pt-4">
+                <Link to="/admin" className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-600/30 transition-all font-bold tracking-wide">
+                  <ShieldAlert className="w-5 h-5" /> Ir al Panel de Control
                 </Link>
               </li>
             )}
