@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Scale, TrendingUp, ShieldCheck, Clock, ArrowRight } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -5,6 +6,10 @@ import { Card, CardContent } from "../components/ui/card";
 import { Footer } from "../components/Footer";
 
 export function JoinPitch() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-background border-b sticky top-0 z-10">

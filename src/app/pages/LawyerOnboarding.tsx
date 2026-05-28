@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Scale,
@@ -18,6 +18,10 @@ import { specialties } from "../data/lawyers";
 import { toast } from "sonner";
 
 export function LawyerOnboarding() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
