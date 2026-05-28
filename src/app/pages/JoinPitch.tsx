@@ -21,7 +21,7 @@ export function JoinPitch() {
             <span className="text-xl font-semibold">Lexi</span>
           </Link>
           <Button asChild variant="outline" className="hidden sm:inline-flex">
-            <Link to="/join">Registrarse como Abogado</Link>
+            <Link to="/join" onClick={() => window.scrollTo(0, 0)}>Registrarse como Abogado</Link>
           </Button>
         </div>
       </header>
@@ -43,7 +43,7 @@ export function JoinPitch() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/25">
-                <Link to="/join">
+                <Link to="/join" onClick={() => window.scrollTo(0, 0)}>
                   Llenar formulario de ingreso
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
