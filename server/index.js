@@ -1,3 +1,5 @@
+// Server entry point!
+// Fixed env
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -91,7 +93,7 @@ app.post('/api/lawyers/update', async (req, res) => {
 
     const lawyer = await Lawyer.findOneAndUpdate(
       { email },
-      { $set: lawyerData },
+      { $set: { ...lawyerData, status: 'pending' } },
       { new: true, upsert: true, runValidators: true }
     );
 
