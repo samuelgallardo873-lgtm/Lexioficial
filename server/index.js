@@ -10,7 +10,13 @@ import { Booking } from './models/Booking.js';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
-dns.setServers(['8.8.8.8', '1.1.1.1']);
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (e) {
+    console.warn("No se pudo configurar dns.setServers:", e.message);
+  }
+}
 dotenv.config();
 
 const app = express();
