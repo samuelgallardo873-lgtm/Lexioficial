@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { CheckCircle, Home, MessageSquare, ArrowLeft, Calendar, Clock } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -14,16 +15,54 @@ const consultationConfig = {
 
 export function ConfirmationPage() {
   const location = useLocation();
-  const {
-    lawyer,
-    consultationType,
-    caseDescription,
-    selectedDate,
-    selectedTime,
-    paymentAmount,
-  } = location.state || {};
+  const [bookingData, setBookingData] = useState<any>(location.state || null);
+  const [isProcessing, setIsProcessing] = useState(!location.state);
 
-  if (!lawyer) {
+  useEffect(() => {
+    // Si venimos de Mercado Pago, location.state estará vacío, así que leemos de sessionStorage
+    const storedBooking = sessionStorage.getItem('lexi_last_booking');
+    
+    if (storedBooking && !bookingData) {
+      const parsedData = JSON.parse(storedBooking);
+      setBookingData(parsedData);
+      
+      // Llamar al backend para enviar el correo y guardar en DB
+      const confirmBooking = async () => {
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+          await fetch(`${apiUrl}/api/confirm-booking`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parsedData)
+          });
+          // Limpiar para no reenviar si recarga la página
+          sessionStorage.removeItem('lexi_last_booking');
+        } catch (error) {
+          console.error("Error confirmando reserva:", error);
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+      
+      confirmBooking();
+    } else {
+      setIsProcessing(false);
+    }
+  }, [bookingData]);
+
+  if (isProcessing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-8 text-center max-w-md w-full">
+          <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+          <h3 className="text-xl font-bold">Procesando tu pago...</h3>
+          <p className="text-muted-foreground">Estamos confirmando la reserva con el abogado.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!bookingData || !bookingData.lawyer) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="p-8 text-center">
@@ -37,6 +76,15 @@ export function ConfirmationPage() {
       </div>
     );
   }
+
+  const {
+    lawyer,
+    consultationType,
+    caseDescription,
+    selectedDate,
+    selectedTime,
+    paymentAmount,
+  } = bookingData;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
