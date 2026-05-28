@@ -21,6 +21,7 @@ import { ChatbotWidget } from "../components/ChatbotWidget";
 import { Footer } from "../components/Footer";
 
 export function FindLawyer() {
+  const apiUrl = import.meta.env.VITE_API_URL || '';
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const [selectedConsultationType, setSelectedConsultationType] =
     useState<string>("all");
@@ -35,7 +36,7 @@ export function FindLawyer() {
 
     const fetchLawyers = async () => {
       try {
-        const response = await fetch("/api/lawyers", { signal: controller.signal });
+        const response = await fetch(`${apiUrl}/api/lawyers`, { signal: controller.signal });
         if (!response.ok) {
           throw new Error("No se pudieron cargar los abogados");
         }

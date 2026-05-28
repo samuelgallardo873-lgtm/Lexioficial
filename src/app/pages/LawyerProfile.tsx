@@ -79,6 +79,7 @@ const generateAvailableSlots = () => {
 };
 
 export function LawyerProfile() {
+  const apiUrl = import.meta.env.VITE_API_URL || '';
   const { id } = useParams();
   const navigate = useNavigate();
   const [lawyer, setLawyer] = useState<Lawyer | null>(null);
@@ -94,7 +95,7 @@ export function LawyerProfile() {
 
     const fetchLawyer = async () => {
       try {
-        const response = await fetch(`/api/lawyers/${id}`);
+        const response = await fetch(`${apiUrl}/api/lawyers/${id}`);
         if (!response.ok) {
           throw new Error("Abogado no encontrado");
         }
@@ -125,7 +126,7 @@ export function LawyerProfile() {
 
     setSubmittingReview(true);
     try {
-      const response = await fetch(`/api/lawyers/${id}/reviews`, {
+      const response = await fetch(`${apiUrl}/api/lawyers/${id}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -82,7 +82,7 @@ export function PaymentPage() {
         paymentAmount: depositAmount,
       }));
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const apiUrl = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/api/create_preference`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -16,7 +16,7 @@ export function AdminLogin() {
     setLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+      const apiUrl = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/api/admin/login`, {
         method: "POST",
         headers: {

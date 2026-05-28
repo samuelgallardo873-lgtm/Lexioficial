@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Lawyer } from "../data/lawyers";
 
 export function AdminDashboard() {
+  const apiUrl = import.meta.env.VITE_API_URL || '';
   const [lawyers, setLawyers] = useState<Lawyer[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,11 +24,11 @@ export function AdminDashboard() {
         return;
       }
 
-      const response = await fetch("/api/admin/lawyers", {
+      const response = await fetch(`${apiUrl}/api/admin/lawyers`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
-
-      const bookingsResponse = await fetch("/api/admin/bookings", {
+ 
+      const bookingsResponse = await fetch(`${apiUrl}/api/admin/bookings`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
 
@@ -64,7 +65,7 @@ export function AdminDashboard() {
     setActionLoading(id);
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`/api/admin/lawyers/${id}/${action}`, {
+      const response = await fetch(`${apiUrl}/api/admin/lawyers/${id}/${action}`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -92,7 +93,7 @@ export function AdminDashboard() {
     setActionLoading(id);
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await fetch(`/api/admin/lawyers/${id}`, {
+      const response = await fetch(`${apiUrl}/api/admin/lawyers/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });

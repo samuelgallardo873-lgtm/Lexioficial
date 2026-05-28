@@ -29,7 +29,7 @@ export function ConfirmationPage() {
       // Llamar al backend para enviar el correo y guardar en DB
       const confirmBooking = async () => {
         try {
-          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+          const apiUrl = import.meta.env.VITE_API_URL || '';
           await fetch(`${apiUrl}/api/confirm-booking`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

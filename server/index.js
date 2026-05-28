@@ -282,7 +282,21 @@ app.post('/api/create_preference', async (req, res) => {
   try {
     const { title, price, quantity } = req.body;
     
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    // Dynamically detect client URL from request headers if CLIENT_URL is not explicitly set in environment
+    let clientUrl = process.env.CLIENT_URL;
+    const referer = req.headers.referer || req.headers.origin;
+    if (!clientUrl && referer) {
+      try {
+        const urlObj = new URL(referer);
+        clientUrl = urlObj.origin;
+      } catch (e) {
+        // Fallback to default
+      }
+    }
+    if (!clientUrl) {
+      clientUrl = "http://localhost:5173";
+    }
+
     const successUrl = `${clientUrl}/confirmation`;
     const failureUrl = `${clientUrl}/payment`;
     const pendingUrl = `${clientUrl}/payment`;
@@ -303,9 +317,15 @@ app.post('/api/create_preference', async (req, res) => {
       },
     };
 
-    // Mercado Pago strictly requires a public URL for auto_return: "approved"
-    // If the success URL contains "localhost" or "127.0.0.1", we must omit auto_return to avoid 400 Bad Request errors.
-    if (!successUrl.includes("localhost") && !successUrl.includes("127.0.0.1")) {
+    // Mercado Pago strictly requires a public, secure (HTTPS) URL for auto_return: "approved"
+    // If the success URL is local or insecure, we must omit auto_return to avoid 400 Bad Request errors.
+    const isLocalOrInsecure = successUrl.includes("localhost") || 
+                              successUrl.includes("127.0.0.1") || 
+                              successUrl.includes("192.168.") || 
+                              successUrl.includes("10.") || 
+                              successUrl.includes("172.") ||
+                              !successUrl.startsWith("https://");
+    if (!isLocalOrInsecure) {
       body.auto_return = "approved";
     }
 

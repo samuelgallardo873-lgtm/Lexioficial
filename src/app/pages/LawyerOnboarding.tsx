@@ -19,6 +19,7 @@ import { specialties } from "../data/lawyers";
 import { toast } from "sonner";
 
 export function LawyerOnboarding() {
+  const apiUrl = import.meta.env.VITE_API_URL || '';
   useEffect(() => {
     setTimeout(scrollToTop, 10);
   }, []);
@@ -113,7 +114,7 @@ export function LawyerOnboarding() {
         )
       };
 
-      const response = await fetch("/api/lawyers/update", {
+      const response = await fetch(`${apiUrl}/api/lawyers/update`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),
