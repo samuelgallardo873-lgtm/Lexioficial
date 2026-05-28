@@ -326,3 +326,5 @@ app.post('/api/create_preference', async (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor Node.js escuchando en http://localhost:${port}`);
 });
+
+export default app;
