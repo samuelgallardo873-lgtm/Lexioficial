@@ -19,7 +19,9 @@ import { toast } from "sonner";
 
 export function LawyerOnboarding() {
   useEffect(() => {
-    window.scrollTo(0, 0);
+    setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, 10);
   }, []);
 
   const [loading, setLoading] = useState(false);
