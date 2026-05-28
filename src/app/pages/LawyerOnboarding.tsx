@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { scrollToTop } from "../../lib/scroll";
 import {
   Scale,
   ArrowLeft,
@@ -18,6 +19,10 @@ import { specialties } from "../data/lawyers";
 import { toast } from "sonner";
 
 export function LawyerOnboarding() {
+  useEffect(() => {
+    setTimeout(scrollToTop, 10);
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -155,7 +160,7 @@ export function LawyerOnboarding() {
 
   return (
     <div className="min-h-screen bg-muted/30 pb-12">
-      <header className="bg-background border-b sticky top-0 z-10">
+      <header className="bg-background border-b sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" asChild>
