@@ -19,6 +19,7 @@ import { LawyerCard } from "../components/LawyerCard";
 import { Lawyer, specialties } from "../data/lawyers";
 import { ChatbotWidget } from "../components/ChatbotWidget";
 import { Footer } from "../components/Footer";
+import { Navbar } from "../components/Navbar";
 
 export function FindLawyer() {
   const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -99,23 +100,9 @@ export function FindLawyer() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-20">
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-            </Button>
-            <div className="flex items-center gap-2">
-              <Scale className="w-8 h-8 text-primary" />
-              <span className="text-xl font-semibold">Lexi</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         <Card className="mb-8">

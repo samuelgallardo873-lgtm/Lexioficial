@@ -34,6 +34,8 @@ import {
 import { ConsultationType, Lawyer } from "../data/lawyers";
 import { ChatbotWidget } from "../components/ChatbotWidget";
 import { Footer } from "../components/Footer";
+import { Navbar } from "../components/Navbar";
+import { useAuth } from "../context/AuthContext";
 
 const consultationConfig = {
   "oral-presencial": {
@@ -169,12 +171,22 @@ export function LawyerProfile() {
   }, [lawyer, consultationType]);
 
   // Datos del formulario
+  const { user } = useAuth();
   const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
   const [clientAge, setClientAge] = useState("");
   const [caseType, setCaseType] = useState("");
   const [caseDescription, setCaseDescription] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      if (!clientName) setClientName(user.name);
+      if (!clientEmail) setClientEmail(user.email);
+    }
+  }, [user]);
 
   const availableSlots = generateAvailableSlots();
 
@@ -222,6 +234,8 @@ export function LawyerProfile() {
         consultationType,
         caseDescription,
         clientName,
+        clientEmail,
+        clientPhone,
         clientAge,
         caseType,
         selectedDate,
@@ -244,23 +258,10 @@ export function LawyerProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-20">
       {/* Header */}
-      <header className="border-b sticky top-0 bg-background z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link to="/find-lawyer">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-            </Button>
-            <div className="flex items-center gap-2">
-              <Scale className="w-8 h-8 text-primary" />
-              <span className="text-xl font-semibold">Lexi</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
+
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
@@ -399,11 +400,11 @@ export function LawyerProfile() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="5">⭐⭐⭐⭐⭐ (Excelente)</SelectItem>
-                                <SelectItem value="4">⭐⭐⭐⭐ (Muy bueno)</SelectItem>
-                                <SelectItem value="3">⭐⭐⭐ (Regular)</SelectItem>
-                                <SelectItem value="2">⭐⭐ (Malo)</SelectItem>
-                                <SelectItem value="1">⭐ (Muy malo)</SelectItem>
+                                <SelectItem value="5"><span>⭐⭐⭐⭐⭐ (Excelente)</span></SelectItem>
+                                <SelectItem value="4"><span>⭐⭐⭐⭐ (Muy bueno)</span></SelectItem>
+                                <SelectItem value="3"><span>⭐⭐⭐ (Regular)</span></SelectItem>
+                                <SelectItem value="2"><span>⭐⭐ (Malo)</span></SelectItem>
+                                <SelectItem value="1"><span>⭐ (Muy malo)</span></SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -572,6 +573,28 @@ export function LawyerProfile() {
               </div>
 
               <div>
+                <Label htmlFor="email">Correo electrónico *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Tu correo para recibir notificaciones"
+                  value={clientEmail}
+                  onChange={(e) => setClientEmail(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Número de teléfono *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="Ej. +54 9 11 1234 5678"
+                  value={clientPhone}
+                  onChange={(e) => setClientPhone(e.target.value)}
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="age">Edad *</Label>
                 <Input
                   id="age"
@@ -598,18 +621,18 @@ export function LawyerProfile() {
                 <Label htmlFor="caseType">Tipo de caso *</Label>
                 <Select value={caseType} onValueChange={setCaseType}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona el tipo de caso" />
+                    <SelectValue placeholder={<span>Selecciona el tipo de caso</span>} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="civil">Civil - Contratos, responsabilidad civil</SelectItem>
-                    <SelectItem value="penal">Penal - Delitos, denuncias</SelectItem>
-                    <SelectItem value="laboral">Laboral - Despidos, condiciones laborales</SelectItem>
-                    <SelectItem value="familiar">Familiar - Divorcios, custodia, herencias</SelectItem>
-                    <SelectItem value="mercantil">Mercantil - Empresas, comercio</SelectItem>
-                    <SelectItem value="fiscal">Fiscal - Impuestos, tributos</SelectItem>
-                    <SelectItem value="inmobiliario">Inmobiliario - Propiedades, alquileres</SelectItem>
-                    <SelectItem value="administrativo">Administrativo - Trámites, recursos</SelectItem>
-                    <SelectItem value="unknown">No sé cual es mi tipo de caso</SelectItem>
+                    <SelectItem value="civil"><span>Civil - Contratos, responsabilidad civil</span></SelectItem>
+                    <SelectItem value="penal"><span>Penal - Delitos, denuncias</span></SelectItem>
+                    <SelectItem value="laboral"><span>Laboral - Despidos, condiciones laborales</span></SelectItem>
+                    <SelectItem value="familiar"><span>Familiar - Divorcios, custodia, herencias</span></SelectItem>
+                    <SelectItem value="mercantil"><span>Mercantil - Empresas, comercio</span></SelectItem>
+                    <SelectItem value="fiscal"><span>Fiscal - Impuestos, tributos</span></SelectItem>
+                    <SelectItem value="inmobiliario"><span>Inmobiliario - Propiedades, alquileres</span></SelectItem>
+                    <SelectItem value="administrativo"><span>Administrativo - Trámites, recursos</span></SelectItem>
+                    <SelectItem value="unknown"><span>No sé cual es mi tipo de caso</span></SelectItem>
                   </SelectContent>
                 </Select>
               </div>

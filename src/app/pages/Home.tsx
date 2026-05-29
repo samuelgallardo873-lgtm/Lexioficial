@@ -19,6 +19,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { ChatbotWidget } from "../components/ChatbotWidget";
 import { Footer } from "../components/Footer";
+import { Navbar } from "../components/Navbar";
 
 export function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -41,35 +42,7 @@ export function Home() {
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20 transition-colors duration-300">
       {/* Header */}
-      <header className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 group cursor-pointer">
-            <div className="p-2 bg-primary rounded-xl group-hover:rotate-12 transition-transform">
-              <Scale className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold tracking-tighter">Lexi</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link to="/faq" className="text-sm font-medium hover:text-primary transition-colors">
-              Cómo funciona
-            </Link>
-            <a href="#beneficios" className="text-sm font-medium hover:text-primary transition-colors">
-              Beneficios
-            </a>
-            <a href="#especialidades" className="text-sm font-medium hover:text-primary transition-colors">
-              Especialidades
-            </a>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={toggleDarkMode} className="rounded-full">
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
-            <Button asChild className="rounded-full px-6 shadow-lg shadow-primary/20">
-              <Link to="/find-lawyer">Buscar abogado</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">

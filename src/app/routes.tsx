@@ -9,6 +9,8 @@ import { FAQ } from "./pages/FAQ";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminLogin } from "./pages/AdminLogin";
 import { JoinPitch } from "./pages/JoinPitch";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
 
 export const router = createBrowserRouter([
   {
@@ -50,5 +52,13 @@ export const router = createBrowserRouter([
   {
     path: "/admin/login",
     Component: AdminLogin,
+  },
+  {
+    path: "/login",
+    Component: Login,
+  },
+  {
+    path: "/register",
+    Component: Register,
   },
 ]);

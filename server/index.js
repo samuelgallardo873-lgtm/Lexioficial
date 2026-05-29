@@ -7,7 +7,9 @@ import dotenv from 'dotenv';
 import dns from 'dns';
 import { Lawyer } from './models/Lawyer.js';
 import { Booking } from './models/Booking.js';
+import { User } from './models/User.js';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import nodemailer from 'nodemailer';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
@@ -125,6 +127,109 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// --- Auth Routes ---
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ error: 'El correo electrónico ya está registrado' });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'usuario' // Default role
+    });
+
+    await newUser.save();
+
+    // Create token
+    const token = jwt.sign(
+      { userId: newUser._id, email: newUser.email, role: newUser.role },
+      process.env.JWT_SECRET || 'fallback_secret',
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      message: 'Usuario registrado exitosamente',
+      token,
+      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role }
+    });
+  } catch (error) {
+    console.error('Error in register:', error);
+    res.status(500).json({ error: 'Error al registrar usuario' });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+
+    const token = jwt.sign(
+      { userId: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'fallback_secret',
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (error) {
+    console.error('Error in login:', error);
+    res.status(500).json({ error: 'Error al iniciar sesión' });
+  }
+});
+
+app.get('/api/auth/me', authenticateToken, async (req, res) => {
+  try {
+    // req.user has the token payload, but let's get fresh user data just in case
+    // Note: older admin login used { username } as payload, we need to handle that gracefully
+    if (req.user.username) {
+      // It's the hardcoded admin token
+      return res.json({
+        id: 'admin-hardcoded',
+        name: 'Administrador Principal',
+        email: 'admin@lexi.com',
+        role: 'admin'
+      });
+    }
+
+    const user = await User.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener datos del usuario' });
+  }
+});
+// --- End Auth Routes ---
+
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
   const adminUsername = process.env.ADMIN_USERNAME || 'admin';
@@ -212,83 +317,39 @@ app.post('/api/lawyers/:id/reviews', async (req, res) => {
   }
 });
 
-app.post('/api/confirm-booking', async (req, res) => {
+// Mercado Pago Integration & Booking Creation
+app.post('/api/create-booking-intent', async (req, res) => {
   try {
-    const { 
-      lawyer, consultationType, caseDescription, clientName, 
-      clientAge, caseType, selectedDate, selectedTime, paymentAmount 
-    } = req.body;
+    const { bookingData } = req.body;
+    
+    if (!bookingData || !bookingData.lawyer) {
+      return res.status(400).json({ error: 'Datos de reserva incompletos' });
+    }
 
+    const { 
+      lawyer, consultationType, caseDescription, clientName, clientEmail, clientPhone,
+      clientAge, caseType, selectedDate, selectedTime, paymentAmount 
+    } = bookingData;
+
+    // 1. Save booking as 'pending'
     const newBooking = new Booking({
       lawyerId: lawyer._id,
       clientName,
+      clientEmail,
+      clientPhone,
       clientAge,
       caseType,
       caseDescription,
       consultationType,
       selectedDate,
       selectedTime,
-      paymentAmount
+      paymentAmount,
+      status: 'pending' // Will be updated to confirmed by Webhook
     });
 
     await newBooking.save();
 
-    // Enviar correo al abogado
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER || 'lexi.plataforma@gmail.com',
-        pass: process.env.EMAIL_PASS || 'password_de_aplicacion'
-      }
-    });
-
-    const mailOptions = {
-      from: '"Lexi Consultas" <lexi.plataforma@gmail.com>',
-      to: lawyer.email,
-      subject: `Nueva Consulta Reservada: ${clientName} - ${selectedDate}`,
-      html: `
-        <h2>¡Tienes una nueva consulta reservada en Lexi!</h2>
-        <p>Un cliente ha realizado el pago del anticipo y agendado una cita contigo.</p>
-        <hr/>
-        <h3>Detalles del Cliente</h3>
-        <ul>
-          <li><strong>Nombre:</strong> ${clientName}</li>
-          <li><strong>Edad:</strong> ${clientAge || 'No especificada'}</li>
-          <li><strong>Tipo de Consulta:</strong> ${consultationType}</li>
-        </ul>
-        <h3>Agenda</h3>
-        <ul>
-          <li><strong>Fecha:</strong> ${selectedDate}</li>
-          <li><strong>Hora:</strong> ${selectedTime}</li>
-        </ul>
-        <h3>Descripción del Caso</h3>
-        <p>${caseDescription || 'El cliente no proveyó detalles previos.'}</p>
-        <hr/>
-        <p>Por favor, prepárate para la consulta. El cliente pagó un anticipo de $${paymentAmount} ARS a través de Mercado Pago.</p>
-        <p>Atentamente,<br/>El equipo de Lexi</p>
-      `
-    };
-
-    // Intentamos enviar el correo, pero no detenemos la respuesta si falla por falta de configuración real
-    try {
-      await transporter.sendMail(mailOptions);
-    } catch (mailError) {
-      console.warn("No se pudo enviar el correo (posiblemente falta configurar credenciales en .env):", mailError.message);
-    }
-
-    res.status(201).json({ message: 'Reserva confirmada', booking: newBooking });
-  } catch (error) {
-    console.error('Error al confirmar reserva:', error);
-    res.status(500).json({ error: 'Error interno del servidor al confirmar reserva' });
-  }
-});
-
-// Mercado Pago Integration
-app.post('/api/create_preference', async (req, res) => {
-  try {
-    const { title, price, quantity } = req.body;
-    
-    // Dynamically detect client URL from request headers if CLIENT_URL is not explicitly set in environment
+    // 2. Prepare Mercado Pago Preference
     let clientUrl = process.env.CLIENT_URL;
     const referer = req.headers.referer || req.headers.origin;
     if (!clientUrl && referer) {
@@ -296,7 +357,7 @@ app.post('/api/create_preference', async (req, res) => {
         const urlObj = new URL(referer);
         clientUrl = urlObj.origin;
       } catch (e) {
-        // Fallback to default
+        // Fallback
       }
     }
     if (!clientUrl) {
@@ -310,9 +371,9 @@ app.post('/api/create_preference', async (req, res) => {
     const body = {
       items: [
         {
-          title: title || "Anticipo de Consulta Legal",
-          quantity: Number(quantity) || 1,
-          unit_price: Number(price),
+          title: `Anticipo de Consulta Legal - Abogado ${lawyer.name}`,
+          quantity: 1,
+          unit_price: Number(paymentAmount),
           currency_id: "ARS",
         },
       ],
@@ -321,16 +382,15 @@ app.post('/api/create_preference', async (req, res) => {
         failure: failureUrl,
         pending: pendingUrl,
       },
+      external_reference: newBooking._id.toString(), // CRITICAL for Webhook tracking
+      notification_url: process.env.WEBHOOK_URL ? `${process.env.WEBHOOK_URL}/api/webhook/mercadopago` : undefined,
     };
 
-    // Mercado Pago strictly requires a public, secure (HTTPS) URL for auto_return: "approved"
-    // If the success URL is local or insecure, we must omit auto_return to avoid 400 Bad Request errors.
     const isLocalOrInsecure = successUrl.includes("localhost") || 
                               successUrl.includes("127.0.0.1") || 
                               successUrl.includes("192.168.") || 
-                              successUrl.includes("10.") || 
-                              successUrl.includes("172.") ||
                               !successUrl.startsWith("https://");
+    
     if (!isLocalOrInsecure) {
       body.auto_return = "approved";
     }
@@ -338,14 +398,117 @@ app.post('/api/create_preference', async (req, res) => {
     const preference = new Preference(mpClient);
     const result = await preference.create({ body });
     
-    // Intelligently select between live checkout (init_point) and sandbox checkout (sandbox_init_point)
     const isProduction = process.env.ACCESS_TOKEN && process.env.ACCESS_TOKEN.startsWith('APP_USR');
     const paymentUrl = isProduction ? result.init_point : (result.sandbox_init_point || result.init_point);
 
-    res.json({ id: result.id, init_point: paymentUrl });
+    res.json({ id: result.id, init_point: paymentUrl, bookingId: newBooking._id });
   } catch (error) {
-    console.error("Error al crear la preferencia de Mercado Pago:", error);
+    console.error("Error al crear intención de reserva:", error);
     res.status(500).json({ error: "No se pudo generar el link de pago", details: error.message || error });
+  }
+});
+
+// Webhook de Mercado Pago
+app.post('/api/webhook/mercadopago', async (req, res) => {
+  try {
+    const { action, data } = req.body;
+    
+    if (action === 'payment.created' || req.query.topic === 'payment') {
+      const paymentId = data?.id || req.query.id;
+      if (!paymentId) return res.status(400).send('No payment ID');
+
+      // 1. Get payment details from MP API manually (since mpClient.payment is sometimes tricky, use fetch)
+      const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: { Authorization: `Bearer ${process.env.ACCESS_TOKEN}` }
+      });
+      const paymentData = await mpResponse.json();
+
+      if (paymentData.status === 'approved') {
+        const bookingId = paymentData.external_reference;
+        
+        // 2. Find booking and update status
+        const booking = await Booking.findById(bookingId).populate('lawyerId');
+        if (booking && booking.status !== 'confirmed') {
+          booking.status = 'confirmed';
+          await booking.save();
+
+          // 3. Send emails
+          const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: process.env.EMAIL_USER || 'lexi.plataforma@gmail.com',
+              pass: process.env.EMAIL_PASS || 'password_de_aplicacion'
+            }
+          });
+
+          // Email for Lawyer
+          const mailToLawyer = {
+            from: '"Lexi Consultas" <lexi.plataforma@gmail.com>',
+            to: booking.lawyerId.email,
+            subject: `Nueva Consulta Reservada: ${booking.clientName} - ${booking.selectedDate}`,
+            html: `
+              <h2>¡Tienes una nueva consulta reservada en Lexi!</h2>
+              <p>Un cliente ha realizado el pago del anticipo y agendado una cita contigo.</p>
+              <hr/>
+              <h3>Detalles del Cliente</h3>
+              <ul>
+                <li><strong>Nombre:</strong> ${booking.clientName}</li>
+                <li><strong>Correo:</strong> ${booking.clientEmail}</li>
+                <li><strong>Teléfono:</strong> ${booking.clientPhone}</li>
+                <li><strong>Edad:</strong> ${booking.clientAge || 'No especificada'}</li>
+                <li><strong>Tipo de Consulta:</strong> ${booking.consultationType}</li>
+              </ul>
+              <h3>Agenda</h3>
+              <ul>
+                <li><strong>Fecha:</strong> ${booking.selectedDate}</li>
+                <li><strong>Hora:</strong> ${booking.selectedTime}</li>
+              </ul>
+              <h3>Descripción del Caso</h3>
+              <p>${booking.caseDescription || 'El cliente no proveyó detalles previos.'}</p>
+              <hr/>
+              <p>Por favor, comunícate con el cliente para coordinar el encuentro o enviarle el enlace de la videollamada.</p>
+              <p>Atentamente,<br/>El equipo de Lexi</p>
+            `
+          };
+
+          // Email for Client
+          const mailToClient = {
+            from: '"Lexi Soporte" <lexi.plataforma@gmail.com>',
+            to: booking.clientEmail,
+            subject: `Confirmación de Reserva - Abogado ${booking.lawyerId.name}`,
+            html: `
+              <h2>¡Tu reserva está confirmada!</h2>
+              <p>Hola ${booking.clientName}, tu pago de $${booking.paymentAmount} ARS ha sido procesado exitosamente.</p>
+              <hr/>
+              <h3>Detalles de tu cita</h3>
+              <ul>
+                <li><strong>Abogado:</strong> ${booking.lawyerId.name}</li>
+                <li><strong>Tipo de Consulta:</strong> ${booking.consultationType}</li>
+                <li><strong>Fecha:</strong> ${booking.selectedDate}</li>
+                <li><strong>Hora:</strong> ${booking.selectedTime}</li>
+              </ul>
+              <hr/>
+              <p><strong>¿Qué sigue?</strong></p>
+              <p>El abogado ha sido notificado y se comunicará contigo próximamente al correo <strong>${booking.clientEmail}</strong> para coordinar los detalles (lugar físico o enlace de videollamada).</p>
+              <p>Si tienes algún problema o el abogado no se contacta, por favor comunícate con nosotros respondiendo a este correo o escribiendo a <a href="mailto:soporte@lexi.com">soporte@lexi.com</a>.</p>
+              <p>Gracias por confiar en Lexi.</p>
+            `
+          };
+
+          try {
+            await transporter.sendMail(mailToLawyer);
+            await transporter.sendMail(mailToClient);
+            console.log(`Correos enviados para la reserva ${bookingId}`);
+          } catch (mailError) {
+            console.warn("No se pudo enviar el correo:", mailError.message);
+          }
+        }
+      }
+    }
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error("Error procesando webhook de Mercado Pago:", error);
+    res.status(500).send('Error');
   }
 });
 

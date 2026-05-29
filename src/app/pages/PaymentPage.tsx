@@ -34,6 +34,8 @@ export function PaymentPage() {
     consultationType,
     caseDescription,
     clientName,
+    clientEmail,
+    clientPhone,
     clientAge,
     caseType,
     selectedDate,
@@ -70,27 +72,27 @@ export function PaymentPage() {
   const handlePayment = async () => {
     setIsProcessing(true);
     try {
-      sessionStorage.setItem('lexi_last_booking', JSON.stringify({
+      const bookingData = {
         lawyer,
         consultationType,
         caseDescription,
         clientName,
+        clientEmail,
+        clientPhone,
         clientAge,
         caseType,
         selectedDate,
         selectedTime,
         paymentAmount: depositAmount,
-      }));
+      };
+
+      sessionStorage.setItem('lexi_last_booking', JSON.stringify(bookingData));
 
       const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/create_preference`, {
+      const response = await fetch(`${apiUrl}/api/create-booking-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: `Anticipo de Consulta - Abogado ${lawyer.name}`,
-          price: depositAmount,
-          quantity: 1
-        })
+        body: JSON.stringify({ bookingData })
       });
 
       if (!response.ok) throw new Error('Error al crear preferencia');

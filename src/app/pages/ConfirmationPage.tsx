@@ -25,26 +25,10 @@ export function ConfirmationPage() {
     if (storedBooking && !bookingData) {
       const parsedData = JSON.parse(storedBooking);
       setBookingData(parsedData);
-      
-      // Llamar al backend para enviar el correo y guardar en DB
-      const confirmBooking = async () => {
-        try {
-          const apiUrl = import.meta.env.VITE_API_URL || '';
-          await fetch(`${apiUrl}/api/confirm-booking`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(parsedData)
-          });
-          // Limpiar para no reenviar si recarga la página
-          sessionStorage.removeItem('lexi_last_booking');
-        } catch (error) {
-          console.error("Error confirmando reserva:", error);
-        } finally {
-          setIsProcessing(false);
-        }
-      };
-      
-      confirmBooking();
+      setIsProcessing(false);
+      // Nota: Ya no llamamos a /api/confirm-booking desde aquí.
+      // El Webhook de Mercado Pago se encarga de confirmar la cita y enviar correos 
+      // de forma segura en el backend cuando detecta el pago.
     } else {
       setIsProcessing(false);
     }
