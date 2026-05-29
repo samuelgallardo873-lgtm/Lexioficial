@@ -109,10 +109,10 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button variant="ghost" asChild className="hidden md:inline-flex rounded-full">
-                <Link to="/login">Iniciar Sesión</Link>
+              <Button variant="ghost" asChild className="rounded-full text-sm px-3">
+                <Link to="/login">Entrar</Link>
               </Button>
-              <Button asChild variant="outline" className="rounded-full hidden lg:inline-flex">
+              <Button asChild variant="outline" className="rounded-full hidden sm:inline-flex">
                 <Link to="/register">Registrarse</Link>
               </Button>
             </div>
