@@ -49,8 +49,8 @@ export function matchLawyersToCase(
     if (caseData.contactMethod === "both") {
       // Si el cliente acepta cualquiera, dar preferencia a abogados que ofrecen ambas
       if (
-        lawyer.consultationType.includes("oral") &&
-        lawyer.consultationType.includes("written")
+        lawyer.consultationType.some(t => t.includes("oral")) &&
+        lawyer.consultationType.some(t => t.includes("escrita"))
       ) {
         score += 20;
         matchReasons.push("Ofrece consultas orales y escritas");
@@ -58,9 +58,7 @@ export function matchLawyersToCase(
         score += 10;
       }
     } else if (
-      lawyer.consultationType.includes(
-        caseData.contactMethod as "oral" | "written"
-      )
+      lawyer.consultationType.some(t => t.includes(caseData.contactMethod === "oral" ? "oral" : "escrita"))
     ) {
       score += 20;
       matchReasons.push(

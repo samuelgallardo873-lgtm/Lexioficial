@@ -43,7 +43,8 @@ export const lawyers: Lawyer[] = [
     name: "Dra. María González",
     specialty: ["civil", "familiar"],
     rating: 4.9,
-    reviews: 127,
+    reviewsCount: 127,
+    reviews: [],
     experience: 15,
     consultationType: ["oral-presencial", "escrita-presencial", "oral-videollamada", "escrita-videollamada"],
     price: {
@@ -62,7 +63,8 @@ export const lawyers: Lawyer[] = [
     name: "Dr. Carlos Ramírez",
     specialty: ["penal", "laboral"],
     rating: 4.8,
-    reviews: 95,
+    reviewsCount: 95,
+    reviews: [],
     experience: 12,
     consultationType: ["oral-presencial", "oral-videollamada"],
     price: {
@@ -79,7 +81,8 @@ export const lawyers: Lawyer[] = [
     name: "Dra. Ana Martínez",
     specialty: ["mercantil", "fiscal"],
     rating: 5.0,
-    reviews: 143,
+    reviewsCount: 143,
+    reviews: [],
     experience: 18,
     consultationType: ["oral-videollamada", "escrita-videollamada"],
     price: {
@@ -96,7 +99,8 @@ export const lawyers: Lawyer[] = [
     name: "Dr. Luis Hernández",
     specialty: ["inmobiliario", "civil"],
     rating: 4.7,
-    reviews: 89,
+    reviewsCount: 89,
+    reviews: [],
     experience: 10,
     consultationType: ["oral-presencial", "escrita-presencial"],
     price: {
@@ -113,7 +117,8 @@ export const lawyers: Lawyer[] = [
     name: "Dra. Patricia Ruiz",
     specialty: ["laboral", "familiar"],
     rating: 4.9,
-    reviews: 156,
+    reviewsCount: 156,
+    reviews: [],
     experience: 14,
     consultationType: ["oral-presencial", "escrita-videollamada", "oral-videollamada"],
     price: {
@@ -131,7 +136,8 @@ export const lawyers: Lawyer[] = [
     name: "Dr. Roberto Sánchez",
     specialty: ["penal", "administrativo"],
     rating: 4.6,
-    reviews: 72,
+    reviewsCount: 72,
+    reviews: [],
     experience: 8,
     consultationType: ["escrita-presencial", "escrita-videollamada"],
     price: {
