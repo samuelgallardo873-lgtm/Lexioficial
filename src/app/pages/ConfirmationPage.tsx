@@ -32,7 +32,24 @@ export function ConfirmationPage() {
     } else {
       setIsProcessing(false);
     }
-  }, [bookingData]);
+    // Check for Mercado Pago return query parameters
+    const params = new URLSearchParams(location.search);
+    const paymentStatus = params.get('status');
+    const paymentId = params.get('payment_id');
+    
+    if (paymentStatus && paymentId) {
+      const alertKey = 'lexi_mp_alerted_' + paymentId;
+      if (!sessionStorage.getItem(alertKey)) {
+        if (paymentStatus === 'approved') {
+          setTimeout(() => alert('¡Se realizó el pago exitosamente!'), 500);
+        } else {
+          setTimeout(() => alert('Hubo un problema con el pago o se encuentra pendiente de acreditación.'), 500);
+        }
+        sessionStorage.setItem(alertKey, 'true');
+      }
+    }
+
+  }, [bookingData, location.search]);
 
   if (isProcessing) {
     return (

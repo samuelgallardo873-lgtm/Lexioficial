@@ -265,7 +265,7 @@ export function PaymentPage() {
                   <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/5 rounded-full blur-xl pointer-events-none" />
                   <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border shadow-inner flex items-center justify-center w-16 h-16 flex-shrink-0">
                     <img 
-                      src="https://logospng.org/download/mercado-pago/logo-mercado-pago-icon-1024.png" 
+                      src="https://http2.mlstatic.com/frontend-assets/ui-navigation/5.19.1/mercadopago/logo__small@2x.png" 
                       alt="Mercado Pago" 
                       className="h-10 w-10 object-contain" 
                     />
