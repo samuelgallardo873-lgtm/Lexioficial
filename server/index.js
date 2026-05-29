@@ -105,6 +105,44 @@ app.post('/api/lawyers/update', async (req, res) => {
       { new: true, upsert: true, runValidators: true }
     );
 
+    // Enviar correo al administrador notificando el nuevo registro
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER || 'lexi.plataforma@gmail.com',
+          pass: process.env.EMAIL_PASS || 'password_de_aplicacion'
+        }
+      });
+
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'lexi.plataforma@gmail.com';
+      
+      const mailToAdmin = {
+        from: '"Lexi Plataforma" <' + (process.env.EMAIL_USER || 'lexi.plataforma@gmail.com') + '>',
+        to: adminEmail,
+        subject: `NUEVO ABOGADO PARA REVISAR: ${lawyer.name}`,
+        html: `
+          <h2>¡Un nuevo abogado se ha registrado en Lexi!</h2>
+          <p>Un abogado ha completado su perfil y está esperando aprobación.</p>
+          <hr/>
+          <h3>Detalles del Abogado</h3>
+          <ul>
+            <li><strong>Nombre:</strong> ${lawyer.name}</li>
+            <li><strong>Correo:</strong> ${lawyer.email}</li>
+            <li><strong>Matrícula:</strong> ${lawyer.matricula}</li>
+            <li><strong>Experiencia:</strong> ${lawyer.experience} años</li>
+          </ul>
+          <hr/>
+          <p>Por favor, ingresa al <a href="${process.env.CLIENT_URL || 'https://www.abogadoslexi.com'}/admin/login">Panel de Control de Admin</a> para revisar y aprobar o rechazar su solicitud.</p>
+        `
+      };
+
+      await transporter.sendMail(mailToAdmin);
+      console.log(`Correo de notificación de nuevo abogado enviado a admin para: ${lawyer.email}`);
+    } catch (mailError) {
+      console.warn("No se pudo enviar el correo de notificación a admin:", mailError.message);
+    }
+
     res.json({ message: 'Datos guardados correctamente', lawyer });
   } catch (error) {
     console.error('❌ Error al guardar abogado:', error);
