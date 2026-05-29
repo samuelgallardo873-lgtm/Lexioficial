@@ -32,10 +32,25 @@ const mpClient = new MercadoPagoConfig({
 app.use(cors());
 app.use(express.json());
 
-// Database Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Conectado a MongoDB'))
-  .catch(err => console.error('Error conectando a MongoDB:', err));
+// Database Connection Middleware for Serverless
+const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) {
+    return;
+  }
+  return mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 5000,
+  });
+};
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('Error connecting to DB:', error);
+    res.status(500).json({ error: 'Database connection failed', details: error.message });
+  }
+});
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend Node.js en funcionamiento' });
@@ -60,16 +75,21 @@ app.get('/api/lawyers', async (req, res) => {
 
 // Get authenticated lawyer profile
 app.get('/api/lawyers/me', authenticateToken, async (req, res) => {
+  console.log('HIT /api/lawyers/me for user:', req.user.email);
   try {
     const lawyer = await Lawyer.findOne({ email: req.user.email });
     if (!lawyer) {
+      console.log('Lawyer not found for:', req.user.email);
       return res.status(404).json({ error: 'Perfil de abogado no encontrado' });
     }
     if (lawyer.status === 'rejected') {
+      console.log('Lawyer rejected for:', req.user.email);
       return res.status(403).json({ error: 'Tu perfil de abogado ha sido rechazado por un administrador.' });
     }
+    console.log('Lawyer found and approved for:', req.user.email);
     res.json(lawyer);
   } catch (error) {
+    console.error('Error in /api/lawyers/me:', error);
     res.status(500).json({ error: 'Error al obtener el perfil de abogado' });
   }
 });
@@ -316,7 +336,7 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
       role: user.role
     });
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener datos del usuario' });
+    res.status(500).json({ error: 'Error al obtener datos del usuario', details: error.message });
   }
 });
 // --- End Auth Routes ---
