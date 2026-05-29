@@ -33,7 +33,7 @@ export function FindLawyer() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     const fetchLawyers = async () => {
       try {
