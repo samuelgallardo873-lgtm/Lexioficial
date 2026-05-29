@@ -383,7 +383,7 @@ app.post('/api/create-booking-intent', async (req, res) => {
         pending: pendingUrl,
       },
       external_reference: newBooking._id.toString(), // CRITICAL for Webhook tracking
-      notification_url: process.env.WEBHOOK_URL ? `${process.env.WEBHOOK_URL}/api/webhook/mercadopago` : undefined,
+      notification_url: (process.env.WEBHOOK_URL || 'https://www.abogadoslexi.com') + '/api/webhook/mercadopago',
     };
 
     const isLocalOrInsecure = successUrl.includes("localhost") || 

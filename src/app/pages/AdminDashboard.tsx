@@ -522,6 +522,7 @@ export function AdminDashboard() {
                               <TableHead>Fecha / Hora</TableHead>
                               <TableHead>Ingreso (Anticipo)</TableHead>
                               <TableHead>Tipo de Consulta</TableHead>
+                              <TableHead>Estado</TableHead>
                               <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -546,6 +547,11 @@ export function AdminDashboard() {
                                 <TableCell>
                                   <span className="capitalize px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-xs">
                                     {booking.consultationType.replace("-", " ")}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${booking.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                    {booking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                                   </span>
                                 </TableCell>
                                 <TableCell className="text-right">
