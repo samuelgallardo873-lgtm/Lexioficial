@@ -299,11 +299,26 @@ export function AdminDashboard() {
   );
 
   const handleWhatsAppNotify = (booking: any) => {
-    const lawyerPhone = booking.lawyerId?.phone || "NO_PHONE_PROVIDED";
+    const lawyerPhone = booking.lawyerId?.phone;
+    if (!lawyerPhone) {
+      alert("Este abogado no tiene un número de teléfono registrado en la base de datos.");
+      return;
+    }
     const lawyerName = booking.lawyerId?.name || "Abogado";
     const message = `Hola Dr/a. ${lawyerName}, soy el administrador de Lexi. Te escribo para notificarte que el cliente *${booking.clientName}* acaba de realizar el pago del anticipo y agendó una consulta (${booking.consultationType}) contigo para el *${booking.selectedDate} a las ${booking.selectedTime}*. Revisa tu correo electrónico para más detalles. ¡Gracias!`;
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${lawyerPhone}?text=${encodedMessage}`, '_blank');
+    window.open(`https://wa.me/${lawyerPhone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`, '_blank');
+  };
+
+  const handleWhatsAppClient = (booking: any) => {
+    const clientPhone = booking.clientPhone;
+    if (!clientPhone) {
+      alert("El cliente no proporcionó su número de teléfono.");
+      return;
+    }
+    const message = `Hola ${booking.clientName}, somos de Soporte Lexi. Te contactamos sobre tu consulta legal con ${booking.lawyerId?.name}.`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/${clientPhone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`, '_blank');
   };
 
   return (
@@ -534,15 +549,28 @@ export function AdminDashboard() {
                                   </span>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Button 
-                                    size="sm"
-                                    variant="ghost"
-                                    className="text-[#25D366] hover:text-[#20bd5a] hover:bg-[#25D366]/10"
-                                    onClick={() => handleWhatsAppNotify(booking)}
-                                    title="Notificar por WhatsApp al abogado"
-                                  >
-                                    <MessageCircle className="w-4 h-4" />
-                                  </Button>
+                                  <div className="flex flex-col gap-2 w-full sm:w-auto">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-green-600 hover:text-green-700 hover:bg-green-50 w-full"
+                                      onClick={() => handleWhatsAppNotify(booking)}
+                                      title="Notificar por WhatsApp al abogado"
+                                    >
+                                      <MessageSquare className="w-4 h-4 mr-2" />
+                                      Abogado
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-green-600 hover:text-green-700 hover:bg-green-50 w-full"
+                                      onClick={() => handleWhatsAppClient(booking)}
+                                      title="Escribir por WhatsApp al cliente"
+                                    >
+                                      <MessageSquare className="w-4 h-4 mr-2" />
+                                      Cliente
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ))}
