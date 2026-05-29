@@ -139,7 +139,7 @@ app.get('/api/lawyers/:id', async (req, res) => {
 app.post('/api/lawyers/update', async (req, res) => {
   try {
     const lawyerData = req.body;
-    const { email, matricula } = lawyerData;
+    const { email, matricula, password } = lawyerData;
 
     if (!email) {
       return res.status(400).json({ error: 'El email es requerido' });
@@ -163,9 +163,31 @@ app.post('/api/lawyers/update', async (req, res) => {
       }
     }
 
+    // Auto-create user account if password is provided
+    if (password) {
+      const existingUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingUser) {
+        return res.status(400).json({ error: 'Este correo ya tiene una cuenta. Por favor, inicia sesión antes de completar el formulario de abogado.' });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      const newUser = new User({
+        name: lawyerData.name,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: 'usuario'
+      });
+      await newUser.save();
+      console.log(`Auto-created user account for ${email}`);
+    }
+
+    const cleanData = { ...lawyerData };
+    delete cleanData.password; // Don't store plain password in Lawyer model!
+
     const lawyer = await Lawyer.findOneAndUpdate(
       { email },
-      { $set: { ...lawyerData, status: 'pending' } },
+      { $set: { ...cleanData, status: 'pending' } },
       { new: true, upsert: true, runValidators: true }
     );
 

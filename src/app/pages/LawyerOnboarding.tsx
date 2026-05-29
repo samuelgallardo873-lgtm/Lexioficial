@@ -17,6 +17,7 @@ import { Checkbox } from "../components/ui/checkbox";
 import { Label } from "../components/ui/label";
 import { specialties } from "../data/lawyers";
 import { toast } from "sonner";
+import { useAuth } from "../context/AuthContext";
 
 export function LawyerOnboarding() {
   const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -24,12 +25,14 @@ export function LawyerOnboarding() {
     setTimeout(scrollToTop, 10);
   }, []);
 
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    name: user?.name || "",
+    email: user?.email || "",
+    password: "",
     matricula: "",
     experience: "",
     description: "",
@@ -49,6 +52,17 @@ export function LawyerOnboarding() {
     languages: "",
     availability: "Disponible ahora",
   });
+
+  // Sync formData when user loads
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || user.name,
+        email: prev.email || user.email
+      }));
+    }
+  }, [user]);
 
   const handleScheduleChange = (type: "presencial" | "virtual", field: "days" | "hours", value: string) => {
     setFormData((prev) => {
@@ -184,6 +198,8 @@ export function LawyerOnboarding() {
           <p className="text-muted-foreground mb-6">
             Tus datos han sido enviados a un administrador para ser revisados. 
             Te notificaremos una vez que tu perfil sea aprobado y esté visible.
+            {!user && <br />}
+            {!user && <span className="font-semibold text-primary mt-2 block">También hemos creado tu cuenta de usuario. ¡Ya puedes iniciar sesión!</span>}
           </p>
           <Button className="w-full" onClick={() => window.location.href = "/"}>
             Volver al inicio
@@ -220,6 +236,18 @@ export function LawyerOnboarding() {
             </p>
           </div>
 
+          {!user && (
+            <div className="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-3">
+              <span className="text-xl">ℹ️</span>
+              <div>
+                <p className="font-semibold text-primary">Al hacer esto se creará tu cuenta en la página</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Hemos añadido un campo de contraseña abajo. Crearemos automáticamente tu cuenta de usuario para que puedas iniciar sesión en tu Panel de Abogado. Si ya tienes una cuenta, por favor <Link to="/login" className="underline font-semibold text-primary">inicia sesión primero</Link>.
+                </p>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Datos Básicos */}
             <Card>
@@ -245,11 +273,27 @@ export function LawyerOnboarding() {
                       type="email"
                       placeholder="tu@email.com"
                       required
+                      disabled={!!user}
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
+                    {user && <p className="text-xs text-muted-foreground">Enlazado a tu cuenta actual.</p>}
                   </div>
                 </div>
+
+                {!user && (
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Contraseña para tu cuenta</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Crea una contraseña segura"
+                      required
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    />
+                  </div>
+                )}
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
