@@ -97,7 +97,7 @@ export function Login() {
               </div>
             </div>
             <Button type="submit" className="w-full rounded-xl mt-6" size="lg" disabled={isLoading}>
-              {isLoading ? "Iniciando..." : "Iniciar Sesión"}
+              {isLoading ? <span>Iniciando...</span> : <span>Iniciar Sesión</span>}
               {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
             </Button>
           </form>

@@ -116,7 +116,7 @@ export function AdminLogin() {
               ) : (
                 <>
                   <Lock className="w-4 h-4 mr-2 group-hover:-translate-y-0.5 transition-transform" />
-                  Iniciar Sesión
+                  <span>Iniciar Sesión</span>
                 </>
               )}
             </Button>

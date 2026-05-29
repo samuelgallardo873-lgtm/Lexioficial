@@ -58,9 +58,15 @@ export function LawyerOnboarding() {
   };
 
   const handlePriceChange = (type: string, value: string) => {
+    // Remove all non-digit characters
+    const numericValue = value.replace(/\D/g, "");
+    
+    // Format with dots
+    const formattedValue = numericValue ? Number(numericValue).toLocaleString("es-AR") : "";
+
     setFormData((prev) => ({
       ...prev,
-      price: { ...prev.price, [type]: value },
+      price: { ...prev.price, [type]: formattedValue },
     }));
   };
 
@@ -110,7 +116,7 @@ export function LawyerOnboarding() {
         price: Object.fromEntries(
           Object.entries(formData.price)
             .filter(([_, v]) => v !== "")
-            .map(([k, v]) => [k, Number(v)])
+            .map(([k, v]) => [k, Number(v.replace(/\D/g, ""))])
         )
       };
 
@@ -364,7 +370,7 @@ export function LawyerOnboarding() {
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-muted-foreground">$</span>
                           <Input
-                            type="number"
+                            type="text"
                             placeholder="Precio"
                             className="w-24"
                             value={formData.price[type.id as keyof typeof formData.price]}
@@ -393,12 +399,12 @@ export function LawyerOnboarding() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Guardando datos...
+                  <span>Guardando datos...</span>
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-5 w-5" />
-                  Guardar Perfil Profesional
+                  <span>Guardar Perfil Profesional</span>
                 </>
               )}
             </Button>

@@ -12,7 +12,9 @@ import { JoinPitch } from "./pages/JoinPitch";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 
-export const router = createBrowserRouter([
+import { ErrorBoundary } from "./components/ErrorBoundary";
+
+const routes = [
   {
     path: "/",
     Component: Home,
@@ -61,4 +63,9 @@ export const router = createBrowserRouter([
     path: "/register",
     Component: Register,
   },
-]);
+].map(route => ({
+  ...route,
+  errorElement: <ErrorBoundary />
+}));
+
+export const router = createBrowserRouter(routes);
