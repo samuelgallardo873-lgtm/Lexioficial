@@ -28,6 +28,10 @@ export interface Lawyer {
     "escrita-videollamada"?: number;
   };
   availability: string;
+  schedule?: {
+    presencial?: { days: string[]; hours: string[] };
+    virtual?: { days: string[]; hours: string[] };
+  };
   image: string;
   description: string;
   languages: string[];

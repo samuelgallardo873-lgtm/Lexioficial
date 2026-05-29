@@ -13,7 +13,16 @@ const lawyerSchema = new mongoose.Schema({
     'oral-videollamada': { type: Number },
     'escrita-videollamada': { type: Number },
   },
-  availability: { type: String },
+  schedule: {
+    presencial: {
+      days: [{ type: String }],
+      hours: [{ type: String }]
+    },
+    virtual: {
+      days: [{ type: String }],
+      hours: [{ type: String }]
+    }
+  },
   image: { type: String },
   description: { type: String },
   languages: [{ type: String }],

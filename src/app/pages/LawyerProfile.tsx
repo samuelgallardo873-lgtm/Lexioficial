@@ -60,25 +60,8 @@ const consultationConfig = {
   },
 };
 
-// Generar horarios disponibles de ejemplo
-const generateAvailableSlots = () => {
-  const slots = [];
-  const today = new Date();
-
-  for (let i = 1; i <= 7; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    const dateStr = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-
-    slots.push({
-      date: dateStr,
-      fullDate: date,
-      times: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00']
-    });
-  }
-
-  return slots;
-};
+// Las franjas horarias ahora se generarán dinámicamente basándose en la configuración del abogado.
+// Eliminamos generateAvailableSlots estático.
 
 export function LawyerProfile() {
   const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -92,18 +75,29 @@ export function LawyerProfile() {
   );
   const [showBookingDialog, setShowBookingDialog] = useState(false);
 
+  const [bookedSlots, setBookedSlots] = useState<{ selectedDate: string, selectedTime: string }[]>([]);
+
   useEffect(() => {
     if (!id) return;
 
-    const fetchLawyer = async () => {
+    const fetchLawyerAndBookings = async () => {
       try {
-        const response = await fetch(`${apiUrl}/api/lawyers/${id}`);
-        if (!response.ok) {
+        const [lawyerRes, bookingsRes] = await Promise.all([
+          fetch(`${apiUrl}/api/lawyers/${id}`),
+          fetch(`${apiUrl}/api/lawyers/${id}/booked-slots`)
+        ]);
+
+        if (!lawyerRes.ok) {
           throw new Error("Abogado no encontrado");
         }
 
-        const data = await response.json();
-        setLawyer(data);
+        const lawyerData = await lawyerRes.json();
+        setLawyer(lawyerData);
+
+        if (bookingsRes.ok) {
+          const bookingsData = await bookingsRes.json();
+          setBookedSlots(bookingsData);
+        }
       } catch (error) {
         setFetchError(
           error instanceof Error ? error.message : "Error desconocido"
@@ -113,8 +107,8 @@ export function LawyerProfile() {
       }
     };
 
-    fetchLawyer();
-  }, [id]);
+    fetchLawyerAndBookings();
+  }, [id, apiUrl]);
 
   // Review form state
   const [reviewName, setReviewName] = useState("");
@@ -188,7 +182,49 @@ export function LawyerProfile() {
     }
   }, [user]);
 
-  const availableSlots = generateAvailableSlots();
+  const availableSlots = React.useMemo(() => {
+    if (!lawyer) return [];
+    
+    // Default config if no schedule exists
+    let allowedDays = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+    let allowedHours = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
+
+    if (lawyer.schedule) {
+      const scheduleType = consultationType?.includes("videollamada") ? "virtual" : "presencial";
+      const specificSchedule = lawyer.schedule[scheduleType];
+      if (specificSchedule && specificSchedule.days?.length > 0) allowedDays = specificSchedule.days;
+      if (specificSchedule && specificSchedule.hours?.length > 0) allowedHours = specificSchedule.hours;
+    }
+
+    const slots = [];
+    const today = new Date();
+    const daysMap = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+    for (let i = 1; i <= 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const dayName = daysMap[date.getDay()];
+
+      if (allowedDays.includes(dayName)) {
+        const dateStr = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+        
+        const bookedHoursForDate = bookedSlots
+          .filter(b => b.selectedDate === dateStr)
+          .map(b => b.selectedTime);
+          
+        const availableHours = allowedHours.filter(h => !bookedHoursForDate.includes(h));
+
+        if (availableHours.length > 0) {
+          slots.push({
+            date: dateStr,
+            fullDate: date,
+            times: availableHours
+          });
+        }
+      }
+    }
+    return slots;
+  }, [lawyer, consultationType, bookedSlots]);
 
   if (loading) {
     return (
@@ -663,21 +699,27 @@ export function LawyerProfile() {
 
               <div>
                 <Label className="mb-3 block">Selecciona un día *</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {availableSlots.map((slot, index) => (
-                    <Button
-                      key={index}
-                      variant={selectedDate === slot.date ? "default" : "outline"}
-                      onClick={() => {
-                        setSelectedDate(slot.date);
-                        setSelectedTime(""); // Reset time when changing date
-                      }}
-                      className="w-full text-xs"
-                    >
-                      {slot.date}
-                    </Button>
-                  ))}
-                </div>
+                {availableSlots.length === 0 ? (
+                  <p className="text-sm text-muted-foreground italic">
+                    No hay turnos disponibles para la modalidad seleccionada en los próximos 30 días.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {availableSlots.slice(0, 9).map((slot, index) => (
+                      <Button
+                        key={index}
+                        variant={selectedDate === slot.date ? "default" : "outline"}
+                        onClick={() => {
+                          setSelectedDate(slot.date);
+                          setSelectedTime(""); // Reset time when changing date
+                        }}
+                        className="w-full text-xs"
+                      >
+                        {slot.date}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {selectedDate && (

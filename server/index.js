@@ -364,6 +364,21 @@ app.post('/api/lawyers/:id/reviews', async (req, res) => {
   }
 });
 
+// Get booked slots for a lawyer
+app.get('/api/lawyers/:id/booked-slots', async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      lawyerId: req.params.id,
+      status: { $nin: ['cancelled', 'rejected'] }
+    }).select('selectedDate selectedTime -_id');
+    
+    res.json(bookings);
+  } catch (error) {
+    console.error('❌ Error al obtener turnos reservados:', error);
+    res.status(500).json({ error: 'Error al obtener disponibilidad' });
+  }
+});
+
 // Mercado Pago Integration & Booking Creation
 app.post('/api/create-booking-intent', async (req, res) => {
   try {
@@ -377,6 +392,18 @@ app.post('/api/create-booking-intent', async (req, res) => {
       lawyer, consultationType, caseDescription, clientName, clientEmail, clientPhone,
       clientAge, caseType, selectedDate, selectedTime, paymentAmount 
     } = bookingData;
+
+    // 0. Verify slot is still available
+    const existingBooking = await Booking.findOne({
+      lawyerId: lawyer._id || lawyer.id,
+      selectedDate,
+      selectedTime,
+      status: { $nin: ['cancelled', 'rejected'] }
+    });
+
+    if (existingBooking) {
+      return res.status(409).json({ error: 'El turno seleccionado ya no está disponible. Por favor, elige otro horario.' });
+    }
 
     // 1. Save booking as 'pending'
     const newBooking = new Booking({

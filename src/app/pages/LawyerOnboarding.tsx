@@ -42,9 +42,36 @@ export function LawyerOnboarding() {
       "oral-videollamada": "",
       "escrita-videollamada": "",
     },
+    schedule: {
+      presencial: { days: [] as string[], hours: [] as string[] },
+      virtual: { days: [] as string[], hours: [] as string[] },
+    },
     languages: "",
     availability: "Disponible ahora",
   });
+
+  const handleScheduleChange = (type: "presencial" | "virtual", field: "days" | "hours", value: string) => {
+    setFormData((prev) => {
+      const current = prev.schedule[type][field];
+      if (current.includes(value)) {
+        return {
+          ...prev,
+          schedule: {
+            ...prev.schedule,
+            [type]: { ...prev.schedule[type], [field]: current.filter((i) => i !== value) },
+          },
+        };
+      } else {
+        return {
+          ...prev,
+          schedule: {
+            ...prev.schedule,
+            [type]: { ...prev.schedule[type], [field]: [...current, value] },
+          },
+        };
+      }
+    });
+  };
 
   const handleCheckboxChange = (field: "specialty" | "consultationType", value: string) => {
     setFormData((prev) => {
@@ -381,6 +408,103 @@ export function LawyerOnboarding() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Horarios y Disponibilidad */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Días y Horarios de Atención</CardTitle>
+                <CardDescription>
+                  Selecciona los días y rangos horarios en los que estás disponible para atender consultas.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {formData.consultationType.some(t => t.includes('presencial')) && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">🏢</span>
+                      Consultas Presenciales
+                    </h3>
+                    <div className="space-y-4 pl-4 border-l-2 border-primary/20">
+                      <div>
+                        <Label className="mb-2 block text-muted-foreground">Días disponibles</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((day) => (
+                            <Button
+                              key={`p-day-${day}`}
+                              type="button"
+                              variant={formData.schedule.presencial.days.includes(day) ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleScheduleChange("presencial", "days", day)}
+                            >
+                              {day}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="mb-2 block text-muted-foreground">Horarios disponibles</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"].map((hour) => (
+                            <Button
+                              key={`p-hour-${hour}`}
+                              type="button"
+                              variant={formData.schedule.presencial.hours.includes(hour) ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleScheduleChange("presencial", "hours", hour)}
+                            >
+                              {hour}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {formData.consultationType.some(t => t.includes('videollamada')) && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">💻</span>
+                      Consultas Virtuales
+                    </h3>
+                    <div className="space-y-4 pl-4 border-l-2 border-primary/20">
+                      <div>
+                        <Label className="mb-2 block text-muted-foreground">Días disponibles</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((day) => (
+                            <Button
+                              key={`v-day-${day}`}
+                              type="button"
+                              variant={formData.schedule.virtual.days.includes(day) ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleScheduleChange("virtual", "days", day)}
+                            >
+                              {day}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="mb-2 block text-muted-foreground">Horarios disponibles</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"].map((hour) => (
+                            <Button
+                              key={`v-hour-${hour}`}
+                              type="button"
+                              variant={formData.schedule.virtual.hours.includes(hour) ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleScheduleChange("virtual", "hours", hour)}
+                            >
+                              {hour}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
