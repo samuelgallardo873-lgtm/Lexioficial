@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { ChatbotWidget } from "../components/ChatbotWidget";
+
 import { Footer } from "../components/Footer";
 import { Navbar } from "../components/Navbar";
 
@@ -234,7 +234,7 @@ export function Home() {
       </section>
 
       <Footer />
-      <ChatbotWidget />
+
     </div>
   );
 }

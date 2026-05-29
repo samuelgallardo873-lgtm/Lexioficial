@@ -32,7 +32,7 @@ import {
   DialogTitle,
 } from "../components/ui/dialog";
 import { ConsultationType, Lawyer } from "../data/lawyers";
-import { ChatbotWidget } from "../components/ChatbotWidget";
+
 import { Footer } from "../components/Footer";
 import { Navbar } from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -728,8 +728,7 @@ export function LawyerProfile() {
         </DialogContent>
       </Dialog>
 
-      {/* Chatbot Widget */}
-      <ChatbotWidget />
+
       <Footer />
     </div>
   );

@@ -17,7 +17,7 @@ import {
 } from "../components/ui/select";
 import { LawyerCard } from "../components/LawyerCard";
 import { Lawyer, specialties } from "../data/lawyers";
-import { ChatbotWidget } from "../components/ChatbotWidget";
+
 import { Footer } from "../components/Footer";
 import { Navbar } from "../components/Navbar";
 
@@ -275,8 +275,7 @@ export function FindLawyer() {
         )}
       </div>
 
-      {/* Chatbot Widget */}
-      <ChatbotWidget />
+
       <Footer />
     </div>
   );
