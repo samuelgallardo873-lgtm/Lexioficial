@@ -203,7 +203,7 @@ app.post('/api/lawyers/update', async (req, res) => {
 });
 
 // Admin endpoints
-const authenticateToken = (req, res, next) => {
+function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   
