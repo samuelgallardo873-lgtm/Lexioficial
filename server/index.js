@@ -333,7 +333,7 @@ app.post('/api/create-booking-intent', async (req, res) => {
 
     // 1. Save booking as 'pending'
     const newBooking = new Booking({
-      lawyerId: lawyer._id,
+      lawyerId: lawyer._id || lawyer.id,
       clientName,
       clientEmail,
       clientPhone,
