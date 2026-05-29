@@ -90,6 +90,17 @@ export function Navbar() {
                     <DropdownMenuSeparator />
                   </>
                 )}
+                {user.isLawyer && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/lawyer-dashboard" className="cursor-pointer flex items-center">
+                        <Scale className="w-4 h-4 mr-2 text-primary" />
+                        Mi Panel de Abogado
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
                   <LogOut className="w-4 h-4 mr-2" />
                   Cerrar Sesión

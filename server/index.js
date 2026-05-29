@@ -71,6 +71,45 @@ app.get('/api/lawyers/:id', async (req, res) => {
   }
 });
 
+// Get authenticated lawyer profile
+app.get('/api/lawyers/me', authenticateToken, async (req, res) => {
+  try {
+    const lawyer = await Lawyer.findOne({ email: req.user.email });
+    if (!lawyer) {
+      return res.status(404).json({ error: 'Perfil de abogado no encontrado' });
+    }
+    res.json(lawyer);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el perfil de abogado' });
+  }
+});
+
+// Update lawyer schedule
+app.put('/api/lawyers/me/schedule', authenticateToken, async (req, res) => {
+  try {
+    const { schedule } = req.body;
+    
+    if (!schedule) {
+      return res.status(400).json({ error: 'El horario es requerido' });
+    }
+
+    const lawyer = await Lawyer.findOneAndUpdate(
+      { email: req.user.email },
+      { $set: { schedule } },
+      { new: true }
+    );
+
+    if (!lawyer) {
+      return res.status(404).json({ error: 'Perfil de abogado no encontrado' });
+    }
+
+    res.json({ message: 'Horario actualizado correctamente', lawyer });
+  } catch (error) {
+    console.error('❌ Error al actualizar horario:', error);
+    res.status(500).json({ error: 'Error al actualizar el horario' });
+  }
+});
+
 // Create or Update lawyer (for the "link" functionality)
 app.post('/api/lawyers/update', async (req, res) => {
   try {

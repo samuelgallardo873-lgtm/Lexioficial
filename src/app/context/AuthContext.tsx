@@ -5,6 +5,8 @@ interface User {
   name: string;
   email: string;
   role: string;
+  isLawyer?: boolean;
+  lawyerId?: string;
 }
 
 interface AuthContextType {
@@ -44,7 +46,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response.ok) {
-        const userData = await response.json();
+        let userData = await response.json();
+        
+        // Also check if the user is a lawyer
+        try {
+          const lawyerResponse = await fetch(`${apiUrl}/api/lawyers/me`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`
+            }
+          });
+          if (lawyerResponse.ok) {
+            const lawyerData = await lawyerResponse.json();
+            userData = {
+              ...userData,
+              isLawyer: true,
+              lawyerId: lawyerData._id
+            };
+          } else {
+            userData = {
+              ...userData,
+              isLawyer: false
+            };
+          }
+        } catch (lawyerErr) {
+          console.error('Error fetching lawyer status:', lawyerErr);
+          userData = { ...userData, isLawyer: false };
+        }
+
         setUser(userData);
       } else {
         // Token might be invalid or expired

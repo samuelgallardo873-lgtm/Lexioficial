@@ -11,6 +11,7 @@ import { AdminLogin } from "./pages/AdminLogin";
 import { JoinPitch } from "./pages/JoinPitch";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { LawyerDashboard } from "./pages/LawyerDashboard";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
@@ -62,6 +63,10 @@ const routes = [
   {
     path: "/register",
     Component: Register,
+  },
+  {
+    path: "/lawyer-dashboard",
+    Component: LawyerDashboard,
   },
 ].map(route => ({
   ...route,
