@@ -58,19 +58,6 @@ app.get('/api/lawyers', async (req, res) => {
   }
 });
 
-// Get lawyer by ID
-app.get('/api/lawyers/:id', async (req, res) => {
-  try {
-    const lawyer = await Lawyer.findById(req.params.id);
-    if (!lawyer) {
-      return res.status(404).json({ error: 'Abogado no encontrado' });
-    }
-    res.json(lawyer);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el abogado' });
-  }
-});
-
 // Get authenticated lawyer profile
 app.get('/api/lawyers/me', authenticateToken, async (req, res) => {
   try {
@@ -112,6 +99,21 @@ app.put('/api/lawyers/me/schedule', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar el horario' });
   }
 });
+
+// Get lawyer by ID
+app.get('/api/lawyers/:id', async (req, res) => {
+  try {
+    const lawyer = await Lawyer.findById(req.params.id);
+    if (!lawyer) {
+      return res.status(404).json({ error: 'Abogado no encontrado' });
+    }
+    res.json(lawyer);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el abogado' });
+  }
+});
+
+
 
 // Create or Update lawyer (for the "link" functionality)
 app.post('/api/lawyers/update', async (req, res) => {
