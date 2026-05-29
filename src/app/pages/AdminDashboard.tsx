@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Check, X, ShieldAlert, ShieldCheck, Loader2, Trash2, LogOut, MessageCircle, Calendar, DollarSign, Users, Download, FileText, Search, Activity, CreditCard } from "lucide-react";
+import { ArrowLeft, Check, X, ShieldAlert, ShieldCheck, Loader2, Trash2, LogOut, MessageCircle, MessageSquare, Calendar, DollarSign, Users, Download, FileText, Search, Activity, CreditCard } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
