@@ -284,7 +284,7 @@ app.post('/api/auth/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Error in login:', error);
-    res.status(500).json({ error: 'Error al iniciar sesión', details: error.message, stack: error.stack });
+    res.status(500).json({ error: 'Error al iniciar sesión' });
   }
 });
 
