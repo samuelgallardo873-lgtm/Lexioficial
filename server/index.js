@@ -78,6 +78,9 @@ app.get('/api/lawyers/me', authenticateToken, async (req, res) => {
     if (!lawyer) {
       return res.status(404).json({ error: 'Perfil de abogado no encontrado' });
     }
+    if (lawyer.status === 'rejected') {
+      return res.status(403).json({ error: 'Tu perfil de abogado ha sido rechazado por un administrador.' });
+    }
     res.json(lawyer);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener el perfil de abogado' });
