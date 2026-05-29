@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { CheckCircle, Home, MessageSquare, ArrowLeft, Calendar, Clock } from "lucide-react";
+import { CheckCircle, Home, MessageSquare, ArrowLeft, Calendar, Clock, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
@@ -64,14 +64,62 @@ export function ConfirmationPage() {
   }
 
   if (!bookingData || !bookingData.lawyer) {
+    const params = new URLSearchParams(location.search);
+    const paymentStatus = params.get('status');
+
+    if (paymentStatus === 'approved') {
+      return (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full p-8 text-center shadow-xl border-none rounded-[2rem] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+            <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+            </div>
+            <h2 className="text-2xl font-bold mb-4">¡Pago Exitoso!</h2>
+            <p className="text-muted-foreground mb-8">
+              Hemos recibido tu pago correctamente. Tu cita ha sido agendada y en breve recibirás un correo electrónico con todos los detalles.
+            </p>
+            <Button asChild className="w-full py-6 rounded-2xl bg-primary hover:bg-primary/90">
+              <Link to="/">
+                <Home className="w-4 h-4 mr-2" />
+                Volver al inicio
+              </Link>
+            </Button>
+          </Card>
+        </div>
+      );
+    } else if (paymentStatus && paymentStatus !== 'approved') {
+      return (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full p-8 text-center shadow-xl border-none rounded-[2rem] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <X className="w-10 h-10 text-red-600 dark:text-red-400" />
+            </div>
+            <h2 className="text-2xl font-bold mb-4">Problema con el pago</h2>
+            <p className="text-muted-foreground mb-8">
+              Tu pago fue rechazado o se encuentra pendiente de validación. Por favor, intenta nuevamente.
+            </p>
+            <Button asChild className="w-full py-6 rounded-2xl bg-primary hover:bg-primary/90">
+              <Link to="/">
+                <Home className="w-4 h-4 mr-2" />
+                Volver al inicio
+              </Link>
+            </Button>
+          </Card>
+        </div>
+      );
+    }
+
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground mb-4">
-            No se encontró información de la consulta
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <Card className="p-8 text-center max-w-md w-full shadow-xl border-none rounded-[2rem] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl">
+          <p className="text-lg font-medium text-muted-foreground mb-6">
+            No se encontró información de la consulta en esta sesión.
           </p>
-          <Button asChild>
-            <Link to="/">Volver al inicio</Link>
+          <Button asChild className="w-full py-6 rounded-2xl bg-primary hover:bg-primary/90">
+            <Link to="/">
+              <Home className="w-4 h-4 mr-2" />
+              Volver al inicio
+            </Link>
           </Button>
         </Card>
       </div>
