@@ -43,6 +43,7 @@ export function PaymentPage() {
   } = location.state || {};
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   if (!lawyer) {
     return (
@@ -330,12 +331,25 @@ export function PaymentPage() {
                   </p>
                 </div>
 
+                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl border border-border/50">
+                  <input 
+                    type="checkbox" 
+                    id="terms" 
+                    className="mt-1 w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  />
+                  <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
+                    He leído y acepto que este pago corresponde al 25% por gastos de gestión, reserva de agenda y uso de la plataforma. Entiendo y acepto que <strong>este anticipo es de carácter NO REEMBOLSABLE</strong> en caso de cancelación o inasistencia por mi parte.
+                  </label>
+                </div>
+
                 {/* Master Action Button */}
                 <div className="space-y-3 pt-2">
                   <Button
-                    className="w-full relative overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 hover:from-indigo-500 hover:via-indigo-600 hover:to-indigo-700 text-white font-bold text-base py-6.5 rounded-2xl shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer hover:shadow-indigo-500/25 group border-none"
+                    className={`w-full relative overflow-hidden text-white font-bold text-base py-6.5 rounded-2xl shadow-xl transition-all duration-300 border-none ${acceptedTerms ? 'bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 hover:from-indigo-500 hover:via-indigo-600 hover:to-indigo-700 hover:scale-[1.02] active:scale-[0.98] cursor-pointer hover:shadow-indigo-500/25 group' : 'bg-slate-400 dark:bg-slate-700 cursor-not-allowed opacity-70'}`}
                     onClick={handlePayment}
-                    disabled={isProcessing}
+                    disabled={isProcessing || !acceptedTerms}
                   >
                     {isProcessing ? (
                       <span className="flex items-center justify-center gap-2">
