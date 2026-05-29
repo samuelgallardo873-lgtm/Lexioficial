@@ -115,11 +115,20 @@ app.post('/api/lawyers/update', async (req, res) => {
         }
       });
 
-      const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER || 'lexi.plataforma@gmail.com';
+      // Obtener todos los administradores de la base de datos
+      const adminUsers = await User.find({ role: 'admin' });
+      const adminEmails = adminUsers.map(user => user.email);
+      
+      // Añadir específicamente el correo solicitado
+      if (!adminEmails.includes('agusmatas@gmail.com')) {
+        adminEmails.push('agusmatas@gmail.com');
+      }
+
+      const toEmails = adminEmails.join(', ');
       
       const mailToAdmin = {
         from: '"Lexi Plataforma" <' + (process.env.EMAIL_USER || 'lexi.plataforma@gmail.com') + '>',
-        to: adminEmail,
+        to: toEmails,
         subject: `NUEVO ABOGADO PARA REVISAR: ${lawyer.name}`,
         html: `
           <h2>¡Un nuevo abogado se ha registrado en Lexi!</h2>
@@ -138,7 +147,7 @@ app.post('/api/lawyers/update', async (req, res) => {
       };
 
       await transporter.sendMail(mailToAdmin);
-      console.log(`Correo de notificación de nuevo abogado enviado a admin para: ${lawyer.email}`);
+      console.log(`Correo de notificación de nuevo abogado enviado a admins (${toEmails})`);
     } catch (mailError) {
       console.warn("No se pudo enviar el correo de notificación a admin:", mailError.message);
     }
