@@ -13,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (token: string, user: User) => void;
+  login: (token: string, user: User) => Promise<void> | void;
   logout: () => void;
 }
 
@@ -87,10 +87,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = (newToken: string, userData: User) => {
+  const login = async (newToken: string, userData: User) => {
     localStorage.setItem('lexi_auth_token', newToken);
     setToken(newToken);
     setUser(userData);
+    // Fetch full user profile to determine if they are a lawyer
+    await fetchUser(newToken);
   };
 
   const logout = () => {
