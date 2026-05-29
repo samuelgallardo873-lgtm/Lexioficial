@@ -6,6 +6,7 @@ import { PaymentPage } from "./pages/PaymentPage";
 import { ConfirmationPage } from "./pages/ConfirmationPage";
 import { LawyerOnboarding } from "./pages/LawyerOnboarding";
 import { FAQ } from "./pages/FAQ";
+import { Terms } from "./pages/Terms";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminLogin } from "./pages/AdminLogin";
 import { JoinPitch } from "./pages/JoinPitch";
@@ -19,6 +20,10 @@ const routes = [
   {
     path: "/",
     Component: Home,
+  },
+  {
+    path: "/terminos",
+    Component: Terms,
   },
   {
     path: "/find-lawyer",

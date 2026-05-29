@@ -20,6 +20,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-slate-400">
             <li><Link to="/" onClick={scrollToTop} className="hover:text-slate-200 transition-colors">Inicio</Link></li>
             <li><Link to="/find-lawyer" onClick={scrollToTop} className="hover:text-slate-200 transition-colors">Buscar Abogados</Link></li>
+            <li><Link to="/terminos" onClick={scrollToTop} className="hover:text-slate-200 transition-colors">Términos y Condiciones</Link></li>
             <li><Link to="/unete" onClick={scrollToTop} className="hover:text-amber-400 text-amber-500 font-medium transition-colors">¿Eres Abogado?</Link></li>
             <li><Link to="/faq" onClick={scrollToTop} className="hover:text-slate-200 transition-colors">Preguntas Frecuentes</Link></li>
             {isAdmin && (
@@ -32,8 +33,11 @@ export function Footer() {
           </ul>
         </div>
         
-        <div className="pt-8 border-t border-slate-900 w-full flex flex-col items-center gap-3 relative">
-          <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">
+        <div className="pt-8 border-t border-slate-900 w-full flex flex-col items-center gap-4 relative">
+          <p className="text-[10px] sm:text-xs text-slate-500 max-w-3xl leading-relaxed">
+            <strong>Aviso Legal:</strong> Lexi es exclusivamente una plataforma tecnológica de emparejamiento. No somos un estudio jurídico ni ofrecemos asesoramiento legal directo. Toda consulta legal se realiza de manera privada e independiente entre el usuario y el profesional del derecho seleccionado. Lexi no garantiza resultados legales de ningún tipo.
+          </p>
+          <p className="text-xs text-slate-600 uppercase tracking-widest font-medium">
             © 2026 Lexi. Todos los derechos reservados.
           </p>
         </div>
