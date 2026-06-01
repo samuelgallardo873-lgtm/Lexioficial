@@ -321,6 +321,28 @@ export function AdminDashboard() {
     window.open(`https://wa.me/${clientPhone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`, '_blank');
   };
 
+  const handleDeleteBooking = async (id: string) => {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar esta cita? Se enviará un correo automático al abogado y al cliente notificando la cancelación. Esta acción no se puede deshacer y restará el ingreso del historial.")) {
+      return;
+    }
+
+    setActionLoading(id);
+    try {
+      const response = await fetch(`${apiUrl}/api/admin/bookings/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error("Error al eliminar");
+      
+      toast.success("Cita eliminada y notificaciones enviadas.");
+      fetchAllLawyers(); // Esto actualizará la lista y los cálculos de ingresos/citas
+    } catch (error) {
+      toast.error("Hubo un problema al eliminar la cita");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/30 pb-12">
       <header className="bg-background border-b sticky top-0 z-10">
@@ -556,25 +578,38 @@ export function AdminDashboard() {
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex flex-col gap-2 w-full sm:w-auto">
+                                    <div className="flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-green-600 hover:text-green-700 hover:bg-green-50 flex-1"
+                                        onClick={() => handleWhatsAppNotify(booking)}
+                                        title="Notificar por WhatsApp al abogado"
+                                      >
+                                        <MessageSquare className="w-4 h-4 mr-1" />
+                                        Abogado
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-green-600 hover:text-green-700 hover:bg-green-50 flex-1"
+                                        onClick={() => handleWhatsAppClient(booking)}
+                                        title="Escribir por WhatsApp al cliente"
+                                      >
+                                        <MessageSquare className="w-4 h-4 mr-1" />
+                                        Cliente
+                                      </Button>
+                                    </div>
                                     <Button
                                       size="sm"
-                                      variant="outline"
-                                      className="text-green-600 hover:text-green-700 hover:bg-green-50 w-full"
-                                      onClick={() => handleWhatsAppNotify(booking)}
-                                      title="Notificar por WhatsApp al abogado"
+                                      variant="destructive"
+                                      className="w-full"
+                                      onClick={() => handleDeleteBooking(booking._id)}
+                                      disabled={actionLoading === booking._id}
+                                      title="Eliminar cita permanentemente y notificar por email"
                                     >
-                                      <MessageSquare className="w-4 h-4 mr-2" />
-                                      Abogado
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="text-green-600 hover:text-green-700 hover:bg-green-50 w-full"
-                                      onClick={() => handleWhatsAppClient(booking)}
-                                      title="Escribir por WhatsApp al cliente"
-                                    >
-                                      <MessageSquare className="w-4 h-4 mr-2" />
-                                      Cliente
+                                      {actionLoading === booking._id ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                                      Cancelar y Eliminar Cita
                                     </Button>
                                   </div>
                                 </TableCell>

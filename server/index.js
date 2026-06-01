@@ -425,6 +425,63 @@ app.get('/api/admin/bookings', authenticateToken, async (req, res) => {
   }
 });
 
+app.delete('/api/admin/bookings/:id', authenticateToken, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('lawyerId');
+    if (!booking) return res.status(404).json({ error: 'Reserva no encontrada' });
+
+    // Send cancellation emails
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER || 'lexi.plataforma@gmail.com',
+          pass: process.env.EMAIL_PASS || 'password_de_aplicacion'
+        }
+      });
+
+      const mailToLawyer = {
+        from: '"Lexi Soporte" <' + (process.env.EMAIL_USER || 'lexi.plataforma@gmail.com') + '>',
+        to: booking.lawyerId?.email,
+        subject: `Consulta Cancelada por Administración: ${booking.clientName}`,
+        html: `
+          <h2>Consulta Cancelada</h2>
+          <p>Hola ${booking.lawyerId?.name || 'Abogado'}, te informamos que la administración de Lexi ha cancelado la siguiente consulta:</p>
+          <ul>
+            <li><strong>Cliente:</strong> ${booking.clientName}</li>
+            <li><strong>Fecha:</strong> ${booking.selectedDate}</li>
+            <li><strong>Hora:</strong> ${booking.selectedTime}</li>
+          </ul>
+          <p>Si tienes dudas, por favor contacta a soporte.</p>
+        `
+      };
+
+      const mailToClient = {
+        from: '"Lexi Soporte" <' + (process.env.EMAIL_USER || 'lexi.plataforma@gmail.com') + '>',
+        to: booking.clientEmail,
+        subject: `Cita Cancelada - Abogado ${booking.lawyerId?.name || ''}`,
+        html: `
+          <h2>Tu cita ha sido cancelada</h2>
+          <p>Hola ${booking.clientName}, te informamos que la administración de Lexi ha cancelado tu cita con el abogado ${booking.lawyerId?.name || ''} programada para el ${booking.selectedDate} a las ${booking.selectedTime}.</p>
+          <p>Nos pondremos en contacto contigo a la brevedad para coordinar la devolución de tu pago o reagendar la consulta.</p>
+          <p>Disculpa las molestias ocasionadas.</p>
+        `
+      };
+
+      if (booking.lawyerId?.email) await transporter.sendMail(mailToLawyer);
+      if (booking.clientEmail) await transporter.sendMail(mailToClient);
+      
+    } catch (mailError) {
+      console.warn("No se pudo enviar el correo de cancelación:", mailError.message);
+    }
+
+    await Booking.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Reserva eliminada correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar reserva' });
+  }
+});
+
 // Add a review to a lawyer
 app.post('/api/lawyers/:id/reviews', async (req, res) => {
   try {

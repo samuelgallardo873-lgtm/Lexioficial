@@ -417,7 +417,7 @@ export function LawyerOnboarding() {
             <Card>
               <CardHeader>
                 <CardTitle>Consultas y Precios</CardTitle>
-                <CardDescription>Define qué servicios ofreces y sus costos base (en USD).</CardDescription>
+                <CardDescription>Define qué servicios ofreces y sus costos base (en ARS).</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid gap-6">
