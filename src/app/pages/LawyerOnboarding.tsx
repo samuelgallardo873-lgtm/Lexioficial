@@ -115,9 +115,9 @@ export function LawyerOnboarding() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 50 * 1024 * 1024) {
       toast.error("Imagen demasiado grande", {
-        description: "El tamaño máximo permitido es de 2MB.",
+        description: "El tamaño máximo permitido es de 50MB.",
       });
       return;
     }
