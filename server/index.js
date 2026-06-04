@@ -95,18 +95,23 @@ app.get('/api/lawyers/me', authenticateToken, async (req, res) => {
   }
 });
 
-// Update lawyer schedule
-app.put('/api/lawyers/me/schedule', authenticateToken, async (req, res) => {
+// Update lawyer settings (schedule and price)
+app.put('/api/lawyers/me/settings', authenticateToken, async (req, res) => {
   try {
-    const { schedule } = req.body;
+    const { schedule, price } = req.body;
     
     if (!schedule) {
       return res.status(400).json({ error: 'El horario es requerido' });
     }
 
+    const updateData = { schedule };
+    if (price) {
+      updateData.price = price;
+    }
+
     const lawyer = await Lawyer.findOneAndUpdate(
       { email: req.user.email },
-      { $set: { schedule } },
+      { $set: updateData },
       { new: true }
     );
 
@@ -114,10 +119,10 @@ app.put('/api/lawyers/me/schedule', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Perfil de abogado no encontrado' });
     }
 
-    res.json({ message: 'Horario actualizado correctamente', lawyer });
+    res.json({ message: 'Configuración actualizada correctamente', lawyer });
   } catch (error) {
-    console.error('❌ Error al actualizar horario:', error);
-    res.status(500).json({ error: 'Error al actualizar el horario' });
+    console.error('❌ Error al actualizar configuración:', error);
+    res.status(500).json({ error: 'Error al actualizar la configuración' });
   }
 });
 

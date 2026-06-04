@@ -6,6 +6,7 @@ import { Scale, Save, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Label } from "../components/ui/label";
+import { Input } from "../components/ui/input";
 import { toast } from "sonner";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -21,6 +22,12 @@ export function LawyerDashboard() {
   const [schedule, setSchedule] = useState({
     presencial: { days: [] as string[], hours: [] as string[] },
     virtual: { days: [] as string[], hours: [] as string[] },
+  });
+  const [price, setPrice] = useState<{ [key: string]: string | number }>({
+    "oral-presencial": "",
+    "escrita-presencial": "",
+    "oral-videollamada": "",
+    "escrita-videollamada": "",
   });
 
   useEffect(() => {
@@ -49,6 +56,13 @@ export function LawyerDashboard() {
         if (data.schedule) {
           setSchedule(data.schedule);
         }
+        if (data.price) {
+          const formattedPrices: { [key: string]: string } = {};
+          Object.keys(data.price).forEach(key => {
+            formattedPrices[key] = data.price[key] ? Number(data.price[key]).toLocaleString("es-AR") : "";
+          });
+          setPrice(formattedPrices);
+        }
       } else {
         toast.error("No se pudo cargar el perfil del abogado.");
       }
@@ -76,23 +90,43 @@ export function LawyerDashboard() {
     });
   };
 
+  const handlePriceChange = (type: string, value: string) => {
+    // Remove all non-digit characters
+    const numericValue = value.replace(/\D/g, "");
+    
+    // Format with dots
+    const formattedValue = numericValue ? Number(numericValue).toLocaleString("es-AR") : "";
+
+    setPrice((prev) => ({
+      ...prev,
+      [type]: formattedValue,
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch(`${apiUrl}/api/lawyers/me/schedule`, {
+      // Parse prices to numbers
+      const parsedPrice = Object.fromEntries(
+        Object.entries(price)
+          .filter(([_, v]) => v !== "")
+          .map(([k, v]) => [k, Number(String(v).replace(/\D/g, ""))])
+      );
+
+      const response = await fetch(`${apiUrl}/api/lawyers/me/settings`, {
         method: "PUT",
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ schedule }),
+        body: JSON.stringify({ schedule, price: parsedPrice }),
       });
 
       if (!response.ok) {
-        throw new Error("No se pudo actualizar el horario.");
+        throw new Error("No se pudo actualizar la configuración.");
       }
 
-      toast.success("¡Horario actualizado con éxito!");
+      toast.success("¡Configuración actualizada con éxito!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Error desconocido");
     } finally {
@@ -218,22 +252,60 @@ export function LawyerDashboard() {
                   </div>
                 </div>
               )}
-
-              <Button onClick={handleSave} disabled={saving} className="w-full mt-6">
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando cambios...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Guardar Horario
-                  </>
-                )}
-              </Button>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Precios de Consulta</CardTitle>
+              <CardDescription>
+                Actualiza los costos base (en ARS) para cada tipo de consulta que ofreces.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-6">
+                {[
+                  { id: "oral-presencial", label: "Consulta Oral Presencial" },
+                  { id: "escrita-presencial", label: "Consulta Escrita Presencial" },
+                  { id: "oral-videollamada", label: "Consulta Oral Virtual" },
+                  { id: "escrita-videollamada", label: "Consulta Escrita Virtual" },
+                ].map((type) => {
+                  if (!consultationType.includes(type.id)) return null;
+                  return (
+                    <div key={type.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border rounded-lg bg-background">
+                      <Label className="font-medium text-base">
+                        {type.label}
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">$</span>
+                        <Input
+                          type="text"
+                          placeholder="Precio"
+                          className="w-32"
+                          value={price[type.id as keyof typeof price] || ""}
+                          onChange={(e) => handlePriceChange(type.id, e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button onClick={handleSave} disabled={saving} className="w-full h-12 text-lg mt-6">
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Guardando cambios...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-5 w-5" />
+                Guardar Cambios
+              </>
+            )}
+          </Button>
         </div>
       </main>
 
